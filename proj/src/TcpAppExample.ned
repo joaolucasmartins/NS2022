@@ -13,6 +13,8 @@ import ned.DatarateChannel;
 
 network TcpAppExample
 {
+    parameters:
+        int n;
     types:
         channel C extends DatarateChannel
         {
@@ -24,15 +26,17 @@ network TcpAppExample
             parameters:
                 @display("p=100,100;is=s");
         }
-        client: StandardHost {
+        client[n]: StandardHost {
             parameters:
-                @display("p=250,150;i=device/pc3");
+                @display("i=device/laptop;p=250,100,col,100");
         }
         server: StandardHost {
             parameters:
                 @display("p=400,150;i=device/pc2");
         }
     connections:
-        client.pppg++ <--> C <--> server.pppg++;
+        for i=0..n-1 {
+            client[i].pppg++ <--> C <--> server.pppg++;
+        }
 }
 
