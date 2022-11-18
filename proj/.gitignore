@@ -1,8 +1,5 @@
 out/
 .settings/
-.cproject
-.oppbuildspec
-.project
 clang-debug/
 .qtenvrc
 results/
