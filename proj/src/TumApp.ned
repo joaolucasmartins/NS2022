@@ -15,21 +15,11 @@ import inet.node.inet.Router;
 
 module TumClient extends StandardHost {
 }
+
 module TumTrain extends StandardHost {
 }
 
-module TumServer {
-    gates:
-        inout clientInOut;
-        inout trainInOut;
-    submodules:
-        trainServer: StandardHost {
-        }
-        clientServer: StandardHost {
-        }
-    connections:
-        clientServer.pppg++ <--> clientInOut;
-        trainServer.pppg++ <--> trainInOut;
+module TumServer extends StandardHost {
 }
 
 network TumNetwork
@@ -58,7 +48,7 @@ network TumNetwork
         }
         server: TumServer {
         	parameters:
-        	    @display("p=400,150;i=device/pc2");
+        	    @display("p=400,250;i=device/pc2");
         }
         clientRouter: Router {
         	parameters:
@@ -75,7 +65,7 @@ network TumNetwork
         for i=0..nTrains-1 {
             train[i].pppg++ <--> C <--> trainRouter.pppg++;
         }
-        clientRouter.pppg++ <--> C <--> server.clientInOut;
-        trainRouter.pppg++ <--> C <--> server.trainInOut;
+        clientRouter.pppg++ <--> C <--> server.pppg++;
+        trainRouter.pppg++ <--> C <--> server.pppg++;
 }
 
