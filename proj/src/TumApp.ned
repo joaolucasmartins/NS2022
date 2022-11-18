@@ -10,6 +10,7 @@ package src;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.node.inet.Router;
 
 
 module TumClient extends StandardHost {
@@ -18,11 +19,17 @@ module TumTrain extends StandardHost {
 }
 
 module TumServer {
+    gates:
+        inout clientInOut;
+        inout trainInOut;
     submodules:
-        udpServer: StandardHost {
+        trainServer: StandardHost {
         }
-        tcpServer: StandardHost {
+        clientServer: StandardHost {
         }
+    connections:
+        clientServer.pppg++ <--> clientInOut;
+        trainServer.pppg++ <--> trainInOut;
 }
 
 network TumNetwork
@@ -53,20 +60,22 @@ network TumNetwork
         	parameters:
         	    @display("p=400,150;i=device/pc2");
         }
-//        clientServer: StandardHost {
-//            parameters:
-//                @display("p=375,150;i=device/pc2");
-//        }
-//        trainServer: StandardHost {
-//            parameters:
-//                @display("p=425,150;i=device/pc2");
-//        }
+        clientRouter: Router {
+        	parameters:
+        	    @display("p=375,150");
+        }
+        trainRouter: Router {
+        	parameters:
+        	    @display("p=425,150");
+        }
     connections:
         for i=0..nClients-1 {
-            client[i].pppg++ <--> C <--> clientServer.pppg++;
+            client[i].pppg++ <--> C <--> clientRouter.pppg++;
         }
         for i=0..nTrains-1 {
-            train[i].pppg++ <--> C <--> trainServer.pppg++;
+            train[i].pppg++ <--> C <--> trainRouter.pppg++;
         }
+        clientRouter.pppg++ <--> C <--> server.clientInOut;
+        trainRouter.pppg++ <--> C <--> server.trainInOut;
 }
 
