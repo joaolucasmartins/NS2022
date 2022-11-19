@@ -53,14 +53,14 @@ network TumNetwork
         	parameters:
         	    @display("p=400,150;i=device/pc2");
         }
-//        clientServer: StandardHost {
-//            parameters:
-//                @display("p=375,150;i=device/pc2");
-//        }
-//        trainServer: StandardHost {
-//            parameters:
-//                @display("p=425,150;i=device/pc2");
-//        }
+        clientServer: StandardHost {
+            parameters:
+                @display("p=375,150;i=device/pc2");
+        }
+        trainServer: StandardHost {
+            parameters:
+                @display("p=425,150;i=device/pc2");
+        }
     connections:
         for i=0..nClients-1 {
             client[i].pppg++ <--> C <--> clientServer.pppg++;
