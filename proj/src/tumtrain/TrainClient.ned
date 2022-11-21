@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package src;
+package src.tumtrain;
 
 import inet.applications.contract.IApp;
 
@@ -33,7 +33,7 @@ import inet.applications.contract.IApp;
 // The peer can be a ~UdpSink, another ~UdpBasicApp (it handles received packets
 // like ~UdpSink), or a ~UdpEchoApp. When used with ~UdpEchoApp, the rcvdPkLifetime
 // statistic will contain the round-trip times.
-simple TrainClient like IApp
+simple TumTrainApp like IApp
 {
 	parameters:
 	    int trainId = default(-1);
@@ -44,7 +44,7 @@ simple TrainClient like IApp
         int localPort = default(-1);  // local port (-1: use ephemeral port)
         string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
         string localAddress = default("");
-        string packetName = default("TrainClientData");
+        string packetName = default("TumTrainData");
         int destPort;
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)

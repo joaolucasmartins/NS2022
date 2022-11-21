@@ -31,7 +31,7 @@ namespace inet {
 /**
  * TODO - Generated class
  */
-class TrainClient : public ClockUserModuleMixin<ApplicationBase>, public UdpSocket::ICallback
+class TumTrainApp : public ClockUserModuleMixin<ApplicationBase>, public UdpSocket::ICallback
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -82,8 +82,8 @@ class TrainClient : public ClockUserModuleMixin<ApplicationBase>, public UdpSock
     virtual void socketClosed(UdpSocket *socket) override;
 
   public:
-    TrainClient() {};
-    ~TrainClient();
+    TumTrainApp() {};
+    ~TumTrainApp();
 };
 
 #endif

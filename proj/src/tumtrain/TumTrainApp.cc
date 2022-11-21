@@ -13,7 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "TrainClient.h"
+#include "TumTrainApp.h"
+
+#include "../common/TrainPacket.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"
@@ -25,14 +27,14 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
-Define_Module(TrainClient);
+Define_Module(TumTrainApp);
 
-TrainClient::~TrainClient()
+TumTrainApp::~TumTrainApp()
 {
     cancelAndDelete(selfMsg);
 }
 
-void TrainClient::initialize(int stage)
+void TumTrainApp::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
 
@@ -44,8 +46,8 @@ void TrainClient::initialize(int stage)
 
         trackId = par("trackId");
         trainId = par("trainId");
-        if (trackId == -1)
-            trackId = getContainingNode(this)->getIndex();
+        if (trainId == -1)
+            trainId = getContainingNode(this)->getIndex();
 
         localPort = par("localPort");
         destPort = par("destPort");
@@ -59,14 +61,14 @@ void TrainClient::initialize(int stage)
     }
 }
 
-void TrainClient::finish()
+void TumTrainApp::finish()
 {
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
     ApplicationBase::finish();
 }
 
-void TrainClient::setSocketOptions()
+void TumTrainApp::setSocketOptions()
 {
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)
@@ -101,7 +103,7 @@ void TrainClient::setSocketOptions()
     socket.setCallback(this);
 }
 
-L3Address TrainClient::chooseDestAddr()
+L3Address TumTrainApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     if (destAddresses[k].isUnspecified() || destAddresses[k].isLinkLocal()) {
@@ -110,17 +112,22 @@ L3Address TrainClient::chooseDestAddr()
     return destAddresses[k];
 }
 
-void TrainClient::sendPacket()
+void TumTrainApp::sendPacket()
 {
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
     if (dontFragment)
         packet->addTag<FragmentationReq>()->setDontFragment(true);
-    const auto& payload = makeShared<ApplicationPacket>();
+    const auto& payload = makeShared<TrainPacket>();
     payload->setChunkLength(B(par("messageLength")));
-    payload->setSequenceNumber(numSent);
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+
+    payload->setTrackId(trackId);
+    payload->setTrainId(trainId);
+    payload->setLon(0);
+    payload->setLat(0);
+
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
@@ -128,7 +135,7 @@ void TrainClient::sendPacket()
     numSent++;
 }
 
-void TrainClient::processStart()
+void TumTrainApp::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
@@ -160,7 +167,7 @@ void TrainClient::processStart()
     }
 }
 
-void TrainClient::processSend()
+void TumTrainApp::processSend()
 {
     sendPacket();
     clocktime_t d = par("sendInterval");
@@ -174,12 +181,12 @@ void TrainClient::processSend()
     }
 }
 
-void TrainClient::processStop()
+void TumTrainApp::processStop()
 {
     socket.close();
 }
 
-void TrainClient::handleMessageWhenUp(cMessage *msg)
+void TumTrainApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         ASSERT(msg == selfMsg);
@@ -204,25 +211,25 @@ void TrainClient::handleMessageWhenUp(cMessage *msg)
         socket.processMessage(msg);
 }
 
-void TrainClient::socketDataArrived(UdpSocket *socket, Packet *packet)
+void TumTrainApp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
     processPacket(packet);
 }
 
-void TrainClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
+void TumTrainApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
 
-void TrainClient::socketClosed(UdpSocket *socket)
+void TumTrainApp::socketClosed(UdpSocket *socket)
 {
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void TrainClient::refreshDisplay() const
+void TumTrainApp::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
 
@@ -231,7 +238,7 @@ void TrainClient::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void TrainClient::processPacket(Packet *pk)
+void TumTrainApp::processPacket(Packet *pk)
 {
     emit(packetReceivedSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
@@ -239,7 +246,7 @@ void TrainClient::processPacket(Packet *pk)
     numReceived++;
 }
 
-void TrainClient::handleStartOperation(LifecycleOperation *operation)
+void TumTrainApp::handleStartOperation(LifecycleOperation *operation)
 {
     clocktime_t start = std::max(startTime, getClockTime());
     if ((stopTime < CLOCKTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
@@ -248,14 +255,14 @@ void TrainClient::handleStartOperation(LifecycleOperation *operation)
     }
 }
 
-void TrainClient::handleStopOperation(LifecycleOperation *operation)
+void TumTrainApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void TrainClient::handleCrashOperation(LifecycleOperation *operation)
+void TumTrainApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelClockEvent(selfMsg);
     socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
