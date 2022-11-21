@@ -21,20 +21,20 @@
 #include <inet/common/lifecycle/ModuleOperations.h>
 #include <inet/common/packet/Packet.h>
 
-#include "TumClient.h"
-#include "ClientPacket.h"
+#include "../common/ClientPacket.h"
+#include "TumClientApp.h"
 
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 
-Define_Module(TumClient);
+Define_Module(TumClientApp);
 
-TumClient::~TumClient()
+TumClientApp::~TumClientApp()
 {
     cancelAndDelete(timeoutMsg);
 }
 
-void TumClient::initialize(int stage)
+void TumClientApp::initialize(int stage)
 {
     TcpAppBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -58,7 +58,7 @@ void TumClient::initialize(int stage)
     }
 }
 
-void TumClient::handleStartOperation(LifecycleOperation *operation)
+void TumClientApp::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t now = simTime();
     simtime_t start = std::max(startTime, now);
@@ -68,25 +68,24 @@ void TumClient::handleStartOperation(LifecycleOperation *operation)
     }
 }
 
-void TumClient::handleStopOperation(LifecycleOperation *operation)
+void TumClientApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
 }
 
-void TumClient::handleCrashOperation(LifecycleOperation *operation)
+void TumClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
 
-void TumClient::sendRequest()
+void TumClientApp::sendRequest()
 {
     const auto& payload = makeShared<ClientPacket>();
 
-    EV_INFO << " about to send " << this->tracksToRequest.size() << " tracks\n";
     Packet *packet = new Packet("data");
     payload->setTracks(this->tracksToRequest);
     payload->setChunkLength(B(1));
@@ -97,7 +96,7 @@ void TumClient::sendRequest()
     sendPacket(packet);
 }
 
-void TumClient::handleTimer(cMessage *msg)
+void TumClientApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
@@ -122,7 +121,7 @@ void TumClient::handleTimer(cMessage *msg)
     }
 }
 
-void TumClient::socketEstablished(TcpSocket *socket)
+void TumClientApp::socketEstablished(TcpSocket *socket)
 {
     TcpAppBase::socketEstablished(socket);
 
@@ -138,7 +137,7 @@ void TumClient::socketEstablished(TcpSocket *socket)
     numRequestsToSend--;
 }
 
-void TumClient::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
+void TumClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
 {
     if (stopTime < SIMTIME_ZERO || d < stopTime) {
         timeoutMsg->setKind(msgKind);
@@ -150,7 +149,7 @@ void TumClient::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
     }
 }
 
-void TumClient::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
+void TumClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
@@ -168,13 +167,13 @@ void TumClient::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     }
 }
 
-void TumClient::close()
+void TumClientApp::close()
 {
     TcpAppBase::close();
     cancelEvent(timeoutMsg);
 }
 
-void TumClient::socketClosed(TcpSocket *socket)
+void TumClientApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
 
@@ -185,7 +184,7 @@ void TumClient::socketClosed(TcpSocket *socket)
     }
 }
 
-void TumClient::socketFailure(TcpSocket *socket, int code)
+void TumClientApp::socketFailure(TcpSocket *socket, int code)
 {
     TcpAppBase::socketFailure(socket, code);
 

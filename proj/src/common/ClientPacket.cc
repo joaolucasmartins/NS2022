@@ -12,24 +12,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
-#include <vector>
 
-#include <omnetpp.h>
-#include <inet/common/packet/chunk/FieldsChunk.h>
+#include "../common/ClientPacket.h"
 
-#ifndef SRC_TUMCLIENT_CLIENTPACKET_H_
-#define SRC_TUMCLIENT_CLIENTPACKET_H_
+ClientPacket::ClientPacket() {
+}
 
-using namespace inet;
-using namespace std;
+ClientPacket::~ClientPacket() {
+}
 
-class ClientPacket : public FieldsChunk {
-private:
-    vector<int> tracks;
-public:
-    ClientPacket();
-    virtual ~ClientPacket();
-    void setTracks(const vector<int> &tracks);
-};
 
-#endif /* SRC_TUMCLIENT_CLIENTPACKET_H_ */
+void ClientPacket::setTracks(const vector<int> &tracks) {
+    this->tracks = tracks;
+}
+
+const vector<int>& ClientPacket::getTracks() const {
+    return this->tracks;
+}

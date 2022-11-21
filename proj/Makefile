@@ -33,7 +33,7 @@ PROJECTRELATIVE_PATH =
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS = $O/src/TumClient/ClientPacket.o $O/src/TumClient/TumClient.o
+OBJS = $O/src/common/ClientPacket.o $O/src/tumclient/TumClientApp.o $O/src/tumserver/clientserverapp/TumClientServerApp.o
 
 # Message files
 MSGFILES =

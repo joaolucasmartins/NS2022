@@ -27,7 +27,7 @@ using namespace omnetpp;
 using namespace inet;
 using namespace std;
 
-class TumClient : public TcpAppBase {
+class TumClientApp : public TcpAppBase {
   protected:
     cMessage *timeoutMsg = nullptr;
     bool earlySend = false; // if true, don't wait with sendRequest() until established()
@@ -56,8 +56,8 @@ class TumClient : public TcpAppBase {
     virtual void close() override;
 
   public:
-    TumClient() {}
-    virtual ~TumClient();
+    TumClientApp() {}
+    virtual ~TumClientApp();
 };
 
 #endif

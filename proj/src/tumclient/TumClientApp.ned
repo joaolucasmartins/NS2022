@@ -12,11 +12,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
-package src.TumClient;
+package src.tumclient;
 
 import inet.applications.contract.IApp;
 
-simple TumClient like IApp {
+simple TumClientApp like IApp {
     parameters:
         string tracksToRequest; // tracks, separated by whitespaces, to request info on
         string localAddress = default(""); // may be left empty ("")
