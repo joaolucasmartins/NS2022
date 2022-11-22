@@ -12,24 +12,34 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
-#include <vector>
+
+#ifndef SRC_COMMON_TRAINPACKET_H_
+#define SRC_COMMON_TRAINPACKET_H_
 
 #include <inet/common/packet/chunk/FieldsChunk.h>
-
-#ifndef SRC_TUMCLIENT_CLIENTPACKET_H_
-#define SRC_TUMCLIENT_CLIENTPACKET_H_
 
 using namespace inet;
 using namespace std;
 
-class ClientPacket : public FieldsChunk {
+class TrainPacket : public FieldsChunk {
 private:
-    vector<int> tracks;
+    int trainId, trackId;
+    float lat, lon;
 public:
-    ClientPacket();
-    virtual ~ClientPacket();
-    void setTracks(const vector<int> &tracks);
-    const vector<int>& getTracks() const;
+    TrainPacket();
+    virtual ~TrainPacket();
+
+    float getLat() const { return lat; }
+    void setLat(float lat) { this->lat = lat; }
+
+    float getLon() const { return lon; }
+    void setLon(float lon) { this->lon = lon; }
+
+    int getTrackId() const { return trackId; }
+    void setTrackId(int trackId) { this->trackId = trackId; }
+
+    int getTrainId() const { return trainId; }
+    void setTrainId(int trainId) { this->trainId = trainId; }
 };
 
-#endif /* SRC_TUMCLIENT_CLIENTPACKET_H_ */
+#endif /* SRC_COMMON_TRAINPACKET_H_ */
