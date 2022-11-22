@@ -145,9 +145,10 @@ void TumTrainServerApp::processStop()
 
 void TumTrainServerApp::processPacket(Packet *pk)
 {
-    EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
+    auto chunk = pk->peekData();
+    const auto& msg = static_cast<const TrainPacket*>(chunk.get());
+    EV_INFO << "Received train update from track id " << msg->getTrackId() << " and train id " << msg->getTrainId() << endl;
     emit(packetReceivedSignal, pk);
-
     delete pk;
 
     numReceived++;

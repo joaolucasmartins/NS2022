@@ -131,6 +131,7 @@ void TumTrainApp::sendPacket()
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
+    EV_INFO << "sending train update for track id " << trackId << " and train id " << trainId << "\n";
     socket.sendTo(packet, destAddr, destPort);
     numSent++;
 }

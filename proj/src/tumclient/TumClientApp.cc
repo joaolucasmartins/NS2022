@@ -92,7 +92,7 @@ void TumClientApp::sendRequest()
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
-    EV_INFO << "sending request with " << this->tracksToRequest.size() << " tracks\n";
+    EV_INFO << "sending client request with " << this->tracksToRequest.size() << " tracks\n";
     sendPacket(packet);
 }
 
