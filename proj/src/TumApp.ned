@@ -12,6 +12,8 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 import inet.node.inet.Router;
 
+import src.tumserver.TrainManager;
+
 
 module TumClient extends StandardHost {
 }
@@ -20,6 +22,8 @@ module TumTrain extends StandardHost {
 }
 
 module TumServer extends StandardHost {
+    submodules:
+        trainManager: TrainManager;
 }
 
 network TumNetwork

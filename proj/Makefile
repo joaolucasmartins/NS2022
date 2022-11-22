@@ -37,6 +37,7 @@ OBJS = \
     $O/src/common/ClientPacket.o \
     $O/src/common/TrainPacket.o \
     $O/src/tumclient/TumClientApp.o \
+    $O/src/tumserver/TrainManager.o \
     $O/src/tumserver/clientserverapp/TumClientServerApp.o \
     $O/src/tumserver/trainserverapp/TumTrainServerApp.o \
     $O/src/tumtrain/TumTrainApp.o

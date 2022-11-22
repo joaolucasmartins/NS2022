@@ -13,9 +13,6 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "TumClientServerApp.h"
-#include "../../common/ClientPacket.h"
-
 #include <inet/common/ModuleAccess.h>
 #include <inet/common/ProtocolTag_m.h>
 #include <inet/common/TimeTag_m.h>
@@ -25,6 +22,10 @@
 #include <inet/common/socket/SocketTag_m.h>
 #include <inet/networklayer/common/L3AddressResolver.h>
 #include <inet/transportlayer/contract/tcp/TcpCommand_m.h>
+
+#include "TumClientServerApp.h"
+#include "../../common/ClientPacket.h"
+#include "../TrainManager.h"
 
 Define_Module(TumClientServerApp);
 
@@ -89,6 +90,13 @@ void TumClientServerApp::sendBack(cMessage *msg)
 
 void TumClientServerApp::handleMessage(cMessage *msg)
 {
+    // TODO Remove this code
+    // This should be used to share state between applications
+    auto parentMod = getParentModule();
+    auto trainManager = static_cast<TrainManager*>(parentMod->getSubmodule("trainManager"));
+    cout << trainManager << endl;
+    cout << " HEHHEHE " << trainManager->getA() << endl;
+
     if (msg->isSelfMessage()) {
         sendBack(msg);
     }
