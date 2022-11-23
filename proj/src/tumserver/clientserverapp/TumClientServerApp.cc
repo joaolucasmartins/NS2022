@@ -107,8 +107,6 @@ void filterPackets(map<int, vector<TrainInfo>> &trackInfo) {
 
 void TumClientServerApp::handleMessage(cMessage *msg)
 {
-    cout << getTrainManager() << endl;
-
     if (msg->isSelfMessage()) {
         sendBack(msg);
     }
@@ -143,7 +141,7 @@ void TumClientServerApp::handleMessage(cMessage *msg)
             outPacket->addTag<SocketReq>()->setSocketId(connId);
 
 
-            // TODO Move this to more readable function
+            // Generate response with requested track information
             TrainManager *manager = getTrainManager();
             const ClientPacket *clientMsg = static_cast<const ClientPacket*>(appmsg.get());
             map<int, vector<TrainInfo>> trackInfo = manager->getTrackInfo(clientMsg->getTracks());
