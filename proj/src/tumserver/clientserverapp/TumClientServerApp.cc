@@ -25,6 +25,8 @@
 
 #include "TumClientServerApp.h"
 #include "../../common/ClientPacket.h"
+#include "../../common/ClientResponsePacket.h"
+#include "../../common/TrainInfo.h"
 
 Define_Module(TumClientServerApp);
 
@@ -93,6 +95,16 @@ void TumClientServerApp::sendBack(cMessage *msg)
     send(msg, "socketOut");
 }
 
+void filterPackets(map<int, vector<TrainInfo>> &trackInfo) {
+    for(auto it = trackInfo.begin(); it != trackInfo.end(); ++it ) {
+        vector<TrainInfo>& trains = it->second;
+        remove_if(trains.begin(), trains.end(), [](TrainInfo info) {
+            double timeDiffSec = (simTime() - info.getTime()).dbl() * 1000000;
+            return (timeDiffSec > 60); // Drop entries larger than 1 min
+        });
+    }
+}
+
 void TumClientServerApp::handleMessage(cMessage *msg)
 {
     cout << getTrainManager() << endl;
@@ -129,7 +141,19 @@ void TumClientServerApp::handleMessage(cMessage *msg)
             //    maxMsgDelay = msgDelay;
             Packet *outPacket = new Packet(msg->getName(), TCP_C_SEND);
             outPacket->addTag<SocketReq>()->setSocketId(connId);
-            const auto& payload = makeShared<ClientPacket>();
+
+
+            // TODO Move this to more readable function
+            TrainManager *manager = getTrainManager();
+            const ClientPacket *clientMsg = static_cast<const ClientPacket*>(appmsg.get());
+            map<int, vector<TrainInfo>> trackInfo = manager->getTrackInfo(clientMsg->getTracks());
+            filterPackets(trackInfo);
+            ClientResponsePacket responseMsg(trackInfo);
+            EV_INFO << "------------------" << endl;
+            printTrainInfo(trackInfo);
+            EV_INFO << "------------------" << endl;
+
+            const auto& payload = makeShared<ClientResponsePacket>(trackInfo);
             payload->setChunkLength(B(1));
             payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
             outPacket->insertAtBack(payload);

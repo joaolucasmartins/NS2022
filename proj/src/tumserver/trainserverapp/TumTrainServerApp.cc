@@ -13,18 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+
+#include <inet/common/ModuleAccess.h>
+#include <inet/common/packet/Packet.h>
+#include <inet/networklayer/common/L3AddressResolver.h>
+#include <inet/transportlayer/contract/udp/UdpControlInfo_m.h>
+
 #include "TumTrainServerApp.h"
-
 #include "../../common/TrainPacket.h"
-
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "../../common/TrainInfo.h"
 
 using namespace inet;
 
 Define_Module(TumTrainServerApp);
+
+TrainManager* TumTrainServerApp::getTrainManager() {
+    auto parentMod = getParentModule();
+    auto trainManager = static_cast<TrainManager*>(parentMod->getSubmodule("trainManager"));
+    return trainManager;
+}
 
 TumTrainServerApp::~TumTrainServerApp()
 {
@@ -148,6 +155,12 @@ void TumTrainServerApp::processPacket(Packet *pk)
     auto chunk = pk->peekData();
     const auto& msg = static_cast<const TrainPacket*>(chunk.get());
     EV_INFO << "Received train update from track id " << msg->getTrackId() << " and train id " << msg->getTrainId() << endl;
+
+    // Get Info from packet and put it in map
+    TrainInfo info(msg);
+    TrainManager *manager = getTrainManager();
+    manager->updateTrainInfo(info);
+
     emit(packetReceivedSignal, pk);
     delete pk;
 

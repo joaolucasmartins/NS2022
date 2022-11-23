@@ -35,7 +35,7 @@ void TrainManager::updateTrainInfo(TrainInfo &trainInfo) {
         trains.insert({trackId, map<int, TrainInfo>()});
 
     trainInfo.setTime(simTime());
-    map<int, TrainInfo> track = trains.at(trackId);
+    map<int, TrainInfo> &track = trains.at(trackId);
     const int trainId = trainInfo.getTrainId();
     if (track.find(trainId) != track.end()) {
         track.erase(trainId);
@@ -60,3 +60,22 @@ const vector<TrainInfo> TrainManager::getTrackInfo(int trackId) {
     return v;
 }
 
+const map<int, vector<TrainInfo>> TrainManager::getTrackInfo(const vector<int> &tracks) {
+    map<int, vector<TrainInfo>> res;
+    for (int track: tracks) {
+        if (hasTrackInfo(track))
+            res.insert({track, getTrackInfo(track)});
+    }
+    return res;
+}
+
+void printTrainInfo(const map<int, vector<TrainInfo>>& trains)
+{
+    for(auto it = trains.begin(); it != trains.end(); ++it ) {
+        EV_INFO << it->first;
+        for (TrainInfo info: it->second) {
+            EV_INFO << " " << info;
+        }
+    }
+    EV_INFO << endl;
+}

@@ -24,9 +24,6 @@
 
 using namespace inet;
 
-/**
- * TODO - Generated class
- */
 class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
 {
   protected:

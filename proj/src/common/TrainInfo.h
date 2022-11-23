@@ -3,36 +3,63 @@
 
 #include  <omnetpp/simtime.h>
 
+#include "TrainPacket.h"
+
 using namespace omnetpp;
 
 class TrainInfo {
 private:
   int train_id, track_id;
+  float lat, lon;
   simtime_t time;
 public:
-    simtime_t getTime() const {
-        return time;
-    }
+  TrainInfo(const TrainPacket *packet) : train_id(packet->getTrainId()), track_id(packet->getTrackId()),
+    lat(packet->getLat()), lon(packet->getLon()) {}
 
-    void setTime(simtime_t time) {
-        this->time = time;
-    }
+  simtime_t getTime() const {
+    return time;
+  }
 
-    int getTrackId() const {
-        return track_id;
-    }
+  void setTime(simtime_t time) {
+    this->time = time;
+  }
 
-    void setTrackId(int trackId) {
-        track_id = trackId;
-    }
+  int getTrackId() const {
+    return track_id;
+  }
 
-    int getTrainId() const {
-        return train_id;
-    }
+  void setTrackId(int trackId) {
+    track_id = trackId;
+  }
 
-    void setTrainId(int trainId) {
-        train_id = trainId;
-    }
+  int getTrainId() const {
+    return train_id;
+  }
+
+  void setTrainId(int trainId) {
+    train_id = trainId;
+  }
+
+  float getLat() const {
+    return lat;
+  }
+
+  void setLat(float lat) {
+    this->lat = lat;
+  }
+
+  float getLon() const {
+    return lon;
+  }
+
+  void setLon(float lon) {
+    this->lon = lon;
+  }
+
+  friend ostream& operator<<(ostream& os, const TrainInfo& info) {
+      os << '[' << info.train_id << "](" << info.lat << ',' << info.lon << ')';
+      return os;
+  }
 };
 
 #endif /* SRC_COMMON_TRAININFO_H_ */

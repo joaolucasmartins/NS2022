@@ -36,6 +36,9 @@ class TrainManager : public cSimpleModule
     void updateTrainInfo(TrainInfo &trainInfo);
     bool hasTrackInfo(int trackId) const;
     const vector<TrainInfo> getTrackInfo(int trackId);
+    const map<int, vector<TrainInfo>> getTrackInfo(const vector<int> &tracks);
 };
+
+void printTrainInfo(const map<int, vector<TrainInfo>>& trains);
 
 #endif
