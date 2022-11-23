@@ -17,24 +17,28 @@
 #define __TRAINULTRAPRECISEMONITORING_TRAINMANAGER_H_
 
 #include <omnetpp.h>
+#include <map>
+#include <vector>
+
+#include "../common/TrainInfo.h"
 
 using namespace omnetpp;
+using namespace std;
 
 class TrainManager : public cSimpleModule
 {
   private:
-    int a=10;
+    map<int, map<int, TrainInfo>> trains;
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
   public:
-      int getA() const {
-          return a;
-      }
-
-      void setA(int a = 10) {
-          this->a = a;
-      }
+    void updateTrainInfo(TrainInfo &trainInfo);
+    bool hasTrackInfo(int trackId) const;
+    const vector<TrainInfo> getTrackInfo(int trackId);
+    const map<int, vector<TrainInfo>> getTrackInfo(const vector<int> &tracks);
 };
+
+void printTrainInfo(const map<int, vector<TrainInfo>>& trains);
 
 #endif

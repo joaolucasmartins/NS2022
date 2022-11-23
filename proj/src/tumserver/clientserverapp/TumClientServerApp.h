@@ -20,11 +20,10 @@
 #include <inet/common/packet/ChunkQueue.h>
 #include <inet/transportlayer/contract/tcp/TcpSocket.h>
 
+#include "../TrainManager.h"
+
 using namespace inet;
 
-/**
- * TODO - Generated class
- */
 class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
@@ -40,6 +39,8 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     std::map<int, ChunkQueue> socketQueue;
 
   protected:
+    TrainManager* getTrainManager();
+
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);
 

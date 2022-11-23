@@ -25,9 +25,16 @@
 
 #include "TumClientServerApp.h"
 #include "../../common/ClientPacket.h"
-#include "../TrainManager.h"
+#include "../../common/ClientResponsePacket.h"
+#include "../../common/TrainInfo.h"
 
 Define_Module(TumClientServerApp);
+
+TrainManager* TumClientServerApp::getTrainManager() {
+    auto parentMod = getParentModule();
+    auto trainManager = static_cast<TrainManager*>(parentMod->getSubmodule("trainManager"));
+    return trainManager;
+}
 
 void TumClientServerApp::initialize(int stage)
 {
@@ -88,15 +95,18 @@ void TumClientServerApp::sendBack(cMessage *msg)
     send(msg, "socketOut");
 }
 
+void filterPackets(map<int, vector<TrainInfo>> &trackInfo) {
+    for(auto it = trackInfo.begin(); it != trackInfo.end(); ++it ) {
+        vector<TrainInfo>& trains = it->second;
+        remove_if(trains.begin(), trains.end(), [](TrainInfo info) {
+            double timeDiffSec = (simTime() - info.getTime()).dbl() * 1000000;
+            return (timeDiffSec > 60); // Drop entries larger than 1 min
+        });
+    }
+}
+
 void TumClientServerApp::handleMessage(cMessage *msg)
 {
-    // TODO Remove this code
-    // This should be used to share state between applications
-    auto parentMod = getParentModule();
-    auto trainManager = static_cast<TrainManager*>(parentMod->getSubmodule("trainManager"));
-    cout << trainManager << endl;
-    cout << " HEHHEHE " << trainManager->getA() << endl;
-
     if (msg->isSelfMessage()) {
         sendBack(msg);
     }
@@ -129,7 +139,19 @@ void TumClientServerApp::handleMessage(cMessage *msg)
             //    maxMsgDelay = msgDelay;
             Packet *outPacket = new Packet(msg->getName(), TCP_C_SEND);
             outPacket->addTag<SocketReq>()->setSocketId(connId);
-            const auto& payload = makeShared<ClientPacket>();
+
+
+            // Generate response with requested track information
+            TrainManager *manager = getTrainManager();
+            const ClientPacket *clientMsg = static_cast<const ClientPacket*>(appmsg.get());
+            map<int, vector<TrainInfo>> trackInfo = manager->getTrackInfo(clientMsg->getTracks());
+            filterPackets(trackInfo);
+            ClientResponsePacket responseMsg(trackInfo);
+            EV_INFO << "------------------" << endl;
+            printTrainInfo(trackInfo);
+            EV_INFO << "------------------" << endl;
+
+            const auto& payload = makeShared<ClientResponsePacket>(trackInfo);
             payload->setChunkLength(B(1));
             payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
             outPacket->insertAtBack(payload);

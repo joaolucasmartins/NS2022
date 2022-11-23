@@ -21,6 +21,8 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
+#include "../TrainManager.h"
+
 using namespace omnetpp;
 using namespace inet;
 
@@ -49,6 +51,8 @@ protected:
     virtual void setSocketOptions();
 
   protected:
+    TrainManager* getTrainManager();
+
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
