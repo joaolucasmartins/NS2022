@@ -48,7 +48,7 @@ network TumNetwork
         }
         train[nTrains]: TumTrain {
             parameters:
-                @display("i=device/laptop;p=550,100,col,100");
+                @display("i=trains/s2;p=550,100,col,100");
         }
         server: TumServer {
         	parameters:

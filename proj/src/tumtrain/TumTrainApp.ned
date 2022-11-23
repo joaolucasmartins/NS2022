@@ -36,8 +36,8 @@ import inet.applications.contract.IApp;
 simple TumTrainApp like IApp
 {
 	parameters:
-	    int trainId = default(-1);
-	    int trackId;
+	    int trainId = default(-1); // unique train identifier (-1: uses parent index)
+	    int trackId = default(2);
 	    
         string interfaceTableModule;   // The path to the InterfaceTable module
         string clockModule = default(""); // relative path of a module that implements IClock; optional
