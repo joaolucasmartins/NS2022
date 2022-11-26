@@ -41,6 +41,8 @@ void TumClientServerApp::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        trainDropTimeLimit = par("trainDropTimeLimit");
+
         delay = par("replyDelay");
         maxMsgDelay = 0;
 

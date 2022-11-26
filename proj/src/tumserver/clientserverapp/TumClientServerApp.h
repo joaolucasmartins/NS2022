@@ -27,6 +27,8 @@ using namespace inet;
 class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
+    double trainDropTimeLimit;
+
     TcpSocket socket;
     simtime_t delay;
     simtime_t maxMsgDelay;
