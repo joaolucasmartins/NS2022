@@ -43,7 +43,8 @@ void TumClientApp::initialize(int stage)
         WATCH(numRequestsToSend);
         WATCH(earlySend);
 
-        istringstream ss{par("tracksToRequest")};
+        const string tracksToRequestParameter = par("tracksToRequest");
+        istringstream ss{tracksToRequestParameter};
         int track_no;
         this->tracksToRequest = vector<int>();
         while (ss >> track_no) {
