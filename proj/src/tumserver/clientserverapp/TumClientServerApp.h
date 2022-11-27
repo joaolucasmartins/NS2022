@@ -19,10 +19,12 @@
 #include <inet/common/lifecycle/LifecycleUnsupported.h>
 #include <inet/common/packet/ChunkQueue.h>
 #include <inet/transportlayer/contract/tcp/TcpSocket.h>
+#include <omnetpp.h>
 
 #include "../TrainManager.h"
 
 using namespace inet;
+using namespace omnetpp;
 
 class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
 {
@@ -37,10 +39,14 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     long msgsSent;
     long bytesRcvd;
     long bytesSent;
+    cHistogram numTrainUpdatesServedStats;
+    cOutVector numTrainUpdatesServedVec;
 
     std::map<int, ChunkQueue> socketQueue;
 
-  protected:
+    void filterPackets(map<int, vector<TrainInfo>> &trackInfo);
+
+  public:
     TrainManager* getTrainManager();
 
     virtual void sendBack(cMessage *msg);

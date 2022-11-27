@@ -13,6 +13,8 @@ private:
   float lat, lon;
   simtime_t time;
 public:
+  TrainInfo() {}
+
   TrainInfo(const TrainPacket *packet) : train_id(packet->getTrainId()), track_id(packet->getTrackId()),
     lat(packet->getLat()), lon(packet->getLon()) {}
 
