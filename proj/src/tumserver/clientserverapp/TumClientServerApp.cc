@@ -97,13 +97,15 @@ void TumClientServerApp::sendBack(cMessage *msg)
     send(msg, "socketOut");
 }
 
-void filterPackets(map<int, vector<TrainInfo>> &trackInfo) {
+void TumClientServerApp::filterPackets(map<int, vector<TrainInfo>> &trackInfo) {
     for(auto it = trackInfo.begin(); it != trackInfo.end(); ++it ) {
         vector<TrainInfo>& trains = it->second;
-        remove_if(trains.begin(), trains.end(), [](TrainInfo info) {
-            double timeDiffSec = (simTime() - info.getTime()).dbl() * 1000000;
-            return (timeDiffSec > 60); // Drop entries larger than 1 min
-        });
+        trains.erase(
+            remove_if(trains.begin(), trains.end(), [&](TrainInfo info) {
+                double timeDiffSec = (simTime() - info.getTime()).dbl();
+                return timeDiffSec > this->trainDropTimeLimit; // Drop entries larger than 1 min
+            }), trains.end()
+        );
     }
 }
 
@@ -154,6 +156,12 @@ void TumClientServerApp::handleMessage(cMessage *msg)
             EV_INFO << "------------------" << endl;
 
             const auto& payload = makeShared<ClientResponsePacket>(trackInfo);
+            int trainUpdates = 0;
+            for (const auto &it: trackInfo) {
+                trainUpdates += it.second.size();
+            }
+            numTrainUpdatesServedVec.record(trainUpdates);
+            numTrainUpdatesServedStats.collect(trainUpdates);
             payload->setChunkLength(B(1));
             payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
             outPacket->insertAtBack(payload);
@@ -189,5 +197,14 @@ void TumClientServerApp::finish()
 {
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
+
+    EV_INFO << getFullPath() << ": Train Update count, min:    " << numTrainUpdatesServedStats.getMin() << endl;
+    EV_INFO << getFullPath() << ": Train Update count, max:    " << numTrainUpdatesServedStats.getMax() << endl;
+    EV_INFO << getFullPath() << ": Train Update count, mean:   " << numTrainUpdatesServedStats.getMean() << endl;
+    EV_INFO << getFullPath() << ": Train Update count, stddev: " << numTrainUpdatesServedStats.getStddev() << endl;
+
+    recordScalar("#bytesSent", bytesSent);
+    recordScalar("#bytesRcvd", bytesRcvd);
+    numTrainUpdatesServedStats.recordAs("train updates sent");
 }
 
