@@ -5,14 +5,14 @@
 //
 //
 
-package src;
+package tum.simulations;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 import inet.node.inet.Router;
 
-import src.tumserver.TrainManager;
+import tum.tumserver.TrainManager;
 
 
 module TumClient extends StandardHost {

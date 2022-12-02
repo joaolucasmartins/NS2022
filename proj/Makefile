@@ -1,5 +1,5 @@
 #
-# OMNeT++/OMNEST Makefile for TrainUltrapreciseMonitoring
+# OMNeT++/OMNEST Makefile for tum
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -O out -KINET4_4_PROJ=../../inet4.4 -DINET_IMPORT -I. -I$$\(INET4_4_PROJ\)/src -L$$\(INET4_4_PROJ\)/src -lINET$$\(D\)
@@ -7,7 +7,7 @@
 
 # Name of target to be created (-o option)
 TARGET_DIR = .
-TARGET_NAME = TrainUltrapreciseMonitoring$(D)
+TARGET_NAME = tum$(D)
 TARGET = $(TARGET_NAME)$(EXE_SUFFIX)
 TARGET_IMPLIB = $(TARGET_NAME)$(IMPLIB_SUFFIX)
 TARGET_IMPDEF = $(TARGET_NAME)$(IMPDEF_SUFFIX)

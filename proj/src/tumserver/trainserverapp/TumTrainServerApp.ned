@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package src.tumserver.trainserverapp;
+package tum.tumserver.trainserverapp;
 
 import inet.applications.contract.IApp;
 
