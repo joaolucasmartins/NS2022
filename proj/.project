@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>TrainUltrapreciseMonitoring</name>
+	<name>tum</name>
 	<comment></comment>
 	<projects>
+		<project>inet</project>
 		<project>inet4.4</project>
 	</projects>
 	<buildSpec>

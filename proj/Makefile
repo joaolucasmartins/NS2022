@@ -1,5 +1,5 @@
 #
-# OMNeT++/OMNEST Makefile for TrainUltrapreciseMonitoring
+# OMNeT++/OMNEST Makefile for tum
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -O out -KINET4_4_PROJ=../../inet4.4 -DINET_IMPORT -I. -I$$\(INET4_4_PROJ\)/src -L$$\(INET4_4_PROJ\)/src -lINET$$\(D\)
@@ -7,7 +7,7 @@
 
 # Name of target to be created (-o option)
 TARGET_DIR = .
-TARGET_NAME = TrainUltrapreciseMonitoring$(D)
+TARGET_NAME = tum$(D)
 TARGET = $(TARGET_NAME)$(EXE_SUFFIX)
 TARGET_IMPLIB = $(TARGET_NAME)$(IMPLIB_SUFFIX)
 TARGET_IMPDEF = $(TARGET_NAME)$(IMPDEF_SUFFIX)
@@ -33,7 +33,14 @@ PROJECTRELATIVE_PATH =
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS =
+OBJS = \
+    $O/src/common/ClientPacket.o \
+    $O/src/common/TrainPacket.o \
+    $O/src/tumclient/TumClientApp.o \
+    $O/src/tumserver/TrainManager.o \
+    $O/src/tumserver/clientserverapp/TumClientServerApp.o \
+    $O/src/tumserver/trainserverapp/TumTrainServerApp.o \
+    $O/src/tumtrain/TumTrainApp.o
 
 # Message files
 MSGFILES =
