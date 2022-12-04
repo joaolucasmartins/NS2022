@@ -8,23 +8,13 @@
 package tum.simulations;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 import inet.node.inet.Router;
 
-import tum.tumserver.TrainManager;
+import tum.tumclient.TumClient;
+import tum.tumtrain.TumTrain;
+import tum.tumserver.TumServer;
 
-
-module TumClient extends StandardHost {
-}
-
-module TumTrain extends StandardHost {
-}
-
-module TumServer extends StandardHost {
-    submodules:
-        trainManager: TrainManager;
-}
 
 network TumNetwork
 {
