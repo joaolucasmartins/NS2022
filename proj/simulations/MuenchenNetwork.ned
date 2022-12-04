@@ -33,6 +33,8 @@ network MuenchenNetwork
     parameters:
         int nClients;
         int nTrains;
+        @display("bgb=93253,52926;bgi=maps/muenchen,s;");
+    
     types:
         channel C extends DatarateChannel
         {
@@ -376,4 +378,5 @@ network MuenchenNetwork
         stop_3690.port++ <--> stop_14065.port++;
         stop_14065.port++ <--> stop_12951.port++;
         stop_12951.port++ <--> stop_4187.port++;
+        
 }

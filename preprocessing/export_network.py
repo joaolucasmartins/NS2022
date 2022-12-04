@@ -63,8 +63,12 @@ calendar = pd.read_csv(os.path.join(SRC_DIR, 'calendar.txt'), dtype=calendar_col
 
 # Find position values to normalize
 min_lon = stops['stop_lon'].min() * SCALE_FACTOR
+max_lon = stops['stop_lon'].max() * SCALE_FACTOR
 min_lat = stops['stop_lat'].min() * SCALE_FACTOR
 max_lat = stops['stop_lat'].max() * SCALE_FACTOR
+
+print("Lon", min_lon, max_lon)
+print("Lat", min_lat, max_lat)
 
 G = nx.Graph()
 s = set()
