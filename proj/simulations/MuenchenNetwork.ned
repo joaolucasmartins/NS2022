@@ -69,7 +69,7 @@ network MuenchenNetwork
         }
         
         sbahnNetworkGenerator: SbahnNetworkGenerator {
-            @display("p=100,100";)
+            @display("p=100,100");
         	filename = "sbahn/muenchen_sbahn.txt";
         	disable = false;
         };
