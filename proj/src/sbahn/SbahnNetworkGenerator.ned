@@ -13,22 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __TUM_SBAHNSTATION_H_
-#define __TUM_SBAHNSTATION_H_
+package tum.sbahn;
 
-
-#include <omnetpp.h>
-
-#include <string>
-
-using namespace omnetpp;
-
-/**
- * TODO - Generated class
- */
-class SbahnStop : public cSimpleModule {
-protected:
-    virtual void initialize() override;
-};
-
-#endif
+//
+// TODO auto-generated module
+//
+simple SbahnNetworkGenerator
+{
+    parameters:
+        bool disable;
+        string filename;
+}

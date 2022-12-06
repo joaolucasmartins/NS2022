@@ -13,22 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __TUM_SBAHNSTATION_H_
-#define __TUM_SBAHNSTATION_H_
-
+#ifndef __TUM_SBAHNNETWORKGENERATOR_H_
+#define __TUM_SBAHNNETWORKGENERATOR_H_
 
 #include <omnetpp.h>
 
 #include <string>
+#include <map>
 
 using namespace omnetpp;
 
 /**
  * TODO - Generated class
  */
-class SbahnStop : public cSimpleModule {
-protected:
-    virtual void initialize() override;
+class SbahnNetworkGenerator : public cSimpleModule
+{
+private:
+    std::map<int, cModule*> stops;
+
+    void parseFile();
+    void addStop(cModule *node, int id, int degree, int lat, int lon, const std::string &name);
+    void addConnection(int a, int b, int routes);
+  protected:
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override;
 };
 
 #endif
