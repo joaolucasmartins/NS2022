@@ -39,8 +39,11 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     long msgsSent;
     long bytesRcvd;
     long bytesSent;
+    long droppedUpdates;
     cHistogram numTrainUpdatesServedStats;
     cOutVector numTrainUpdatesServedVec;
+    cHistogram numTrainUpdatesDroppedStats;
+    cOutVector numTrainUpdatesDroppedVec;
 
     std::map<int, ChunkQueue> socketQueue;
 

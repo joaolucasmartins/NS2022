@@ -43,6 +43,7 @@ void TumTrainServerApp::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        numTrainUpdatesReceivedVec.setName("serverSentTrainUpdates");
         numReceived = 0;
         WATCH(numReceived);
 
@@ -158,7 +159,9 @@ void TumTrainServerApp::processPacket(Packet *pk)
 
     // Get Info from packet and put it in map
     TrainInfo info(msg);
+
     TrainManager *manager = getTrainManager();
+    numTrainUpdatesReceivedVec.record(numReceived);
     manager->updateTrainInfo(info);
 
     emit(packetReceivedSignal, pk);
