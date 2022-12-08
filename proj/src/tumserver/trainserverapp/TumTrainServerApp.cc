@@ -43,7 +43,7 @@ void TumTrainServerApp::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        numTrainUpdatesReceivedVec.setName("serverSentTrainUpdates");
+        numTrainUpdatesReceivedVec.setName("serverReceivedTrainUpdates");
         numReceived = 0;
         WATCH(numReceived);
 
