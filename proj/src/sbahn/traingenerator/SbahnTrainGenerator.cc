@@ -21,6 +21,10 @@ Define_Module(SbahnTrainGenerator);
 
 void SbahnTrainGenerator::initialize(int stage)
 {
+    connectionType = par("connectionType").getValue().str();
+    trainRouterPattern = par("trainRouterPattern").getValue().str();
+    portName = par("portName").getValue().str();
+
     std::string trainFileName = par("trainFile");
     trainIn.open(trainFileName, std::ios::in);
     if (trainIn.fail())
@@ -30,21 +34,27 @@ void SbahnTrainGenerator::initialize(int stage)
 
     getParentModule()->addSubmoduleVector(VEC_NAME, 0);
 
-//    createNextTrain();
-    addTrain(getParentModule(), 0, 1);
+    createNextTrains();
 }
 
 void SbahnTrainGenerator::createNextTrains() {
     cModule *parent = getParentModule();
     int startTime, endTime, route;
+    simtime_t now = simTime();
 
-    auto curPos = trainIn.tellg();
-    trainIn >> startTime >> endTime >> route;
+    do {
+        auto curPos = trainIn.tellg();
+        trainIn >> startTime >> endTime >> route;
 
-//    simtime_t now = simTime(), start = SimTime(startTime, SimTimeUnit::SIMTIME_S);
-//    if ()
+        simtime_t start = SimTime(startTime, SimTimeUnit::SIMTIME_S);
 
-//    trainIn.seekg(__off, __dir)
+        if (start > now) {
+            trainIn.seekg(curPos, std::ios::beg);
+            break;
+        }
+
+        addTrain(parent, curTrainIndex++, route);
+    } while (true);
 }
 
 void SbahnTrainGenerator::addTrain(cModule *parent, int bonnIndex, int route) {
@@ -57,15 +67,26 @@ void SbahnTrainGenerator::addTrain(cModule *parent, int bonnIndex, int route) {
     cModule* module = moduleType->create(VEC_NAME, parent, 0);
 
     // set up parameters and gate sizes before we set up its submodules
-//        module->par("x") = std::to_string(lon);
-//        module->par("y") = std::to_string(lat);
-//        module->par("stopName") = name;
-
     module->par("trainId") = bonnIndex;
     module->par("trackId") = route;
 
     module->finalizeParameters();
 
+    // setup gate
+    cChannelType *channelType = cChannelType::get(connectionType.c_str());
+    cChannel *c1 = channelType->create("channel"), *c2 = channelType->create("channel");
+
+    // create connections
+    cModule *router = getModuleByPath(trainRouterPattern.c_str());
+    cGate *moduleGateIn, *moduleGateOut, *routerGateIn, *routerGateOut;
+    module->getOrCreateFirstUnconnectedGatePair(portName.c_str(), false, false, moduleGateIn, moduleGateOut);
+    router->getOrCreateFirstUnconnectedGatePair(portName.c_str(), false, false, routerGateIn, routerGateOut);
+
+    moduleGateOut->connectTo(routerGateIn, c1);
+    routerGateOut->connectTo(moduleGateIn, c2);
+
+    moduleGateOut->getDisplayString().setTagArg("ls", 1, "0.5");
+    routerGateOut->getDisplayString().setTagArg("ls", 1, "0.5");
 
     // create internals, and schedule activation message
     module->buildInside();

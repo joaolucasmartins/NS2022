@@ -23,4 +23,6 @@ simple SbahnTrainGenerator
     parameters:
         string trainFile;
         string trainRouterPattern;
+        string connectionType;
+        string portName;
 }

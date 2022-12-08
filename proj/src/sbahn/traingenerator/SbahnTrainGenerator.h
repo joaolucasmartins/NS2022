@@ -30,6 +30,7 @@ class SbahnTrainGenerator : public cSimpleModule
 {
 private:
    std::ifstream trainIn;
+   std::string connectionType, trainRouterPattern, portName;
 
    int nTrains, curTrainIndex;
 
