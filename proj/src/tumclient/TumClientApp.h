@@ -33,9 +33,13 @@ class TumClientApp : public TcpAppBase {
     bool earlySend = false; // if true, don't wait with sendRequest() until established()
     int numRequestsToSend = 0; // requests to send in this session
     vector<int> tracksToRequest;
+    simtime_t timestampReq;
 
     simtime_t startTime;
     simtime_t stopTime;
+
+    cHistogram timeToResponseStats;
+    cOutVector timeToResponseVec;
 
     virtual void sendRequest();
     virtual void rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind);
@@ -54,6 +58,7 @@ class TumClientApp : public TcpAppBase {
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void close() override;
+    void finish() override;
 
   public:
     TumClientApp() {}

@@ -8,7 +8,7 @@
 package tum.simulations;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import ned.DatarateChannel;
+import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 
 import tum.tumclient.TumClient;
@@ -22,11 +22,7 @@ network TumNetwork
         int nClients;
         int nTrains;
     types:
-        channel C extends DatarateChannel
-        {
-            datarate = 100Mbps;
-            delay = 0.1us;
-        }
+        channel C extends Eth100M {}
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -54,12 +50,12 @@ network TumNetwork
         }
     connections:
         for i=0..nClients-1 {
-            client[i].pppg++ <--> C <--> clientRouter.pppg++;
+            client[i].ethg++ <--> C <--> clientRouter.ethg++;
         }
         for i=0..nTrains-1 {
-            train[i].pppg++ <--> C <--> trainRouter.pppg++;
+            train[i].ethg++ <--> C <--> trainRouter.ethg++;
         }
-        clientRouter.pppg++ <--> C <--> server.pppg++;
-        trainRouter.pppg++ <--> C <--> server.pppg++;
+        clientRouter.ethg++ <--> C <--> server.ethg++;
+        trainRouter.ethg++ <--> C <--> server.ethg++;
 }
 

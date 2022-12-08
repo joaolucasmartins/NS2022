@@ -42,7 +42,6 @@ protected:
     cMessage *selfMsg = nullptr;
     int numReceived = 0;
 
-
     cOutVector numTrainUpdatesReceivedVec;
 
   public:
