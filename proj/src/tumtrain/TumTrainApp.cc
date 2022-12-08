@@ -44,8 +44,11 @@ void TumTrainApp::initialize(int stage)
         WATCH(numSent);
         WATCH(numReceived);
 
-        trackId = par("trackId");
-        trainId = par("trainId");
+
+        trackId = getParentModule()->par("trackId");
+        getParentModule()->getDisplayString().setTagArg("i", 0, ("trains/s" + std::to_string(trackId)).c_str());
+
+        trainId =  getParentModule()->par("trainId");
         if (trainId == -1)
             trainId = getContainingNode(this)->getIndex();
 

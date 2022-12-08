@@ -36,8 +36,10 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 OBJS = \
     $O/src/common/ClientPacket.o \
     $O/src/common/TrainPacket.o \
-    $O/src/sbahn/SbahnNetworkGenerator.o \
-    $O/src/sbahn/SbahnStop.o \
+    $O/src/mobility/train/TrainBonnMotionMobility.o \
+    $O/src/sbahn/networkgenerator/SbahnNetworkGenerator.o \
+    $O/src/sbahn/stop/SbahnStop.o \
+    $O/src/sbahn/traingenerator/SbahnTrainGenerator.o \
     $O/src/tumclient/TumClientApp.o \
     $O/src/tumserver/TrainManager.o \
     $O/src/tumserver/clientserverapp/TumClientServerApp.o \
