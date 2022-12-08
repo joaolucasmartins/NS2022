@@ -19,7 +19,7 @@ package tum.simulations;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
+import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 
 import tum.tumclient.TumClient;
@@ -36,11 +36,7 @@ network MuenchenNetwork
         @display("bgb=93253,52926;bgi=maps/muenchen,s;");
     
     types:
-        channel C extends DatarateChannel
-        {
-            datarate = 100Mbps;
-            delay = 0.1us;
-        }
+        channel C extends Eth100M {}
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -77,13 +73,12 @@ network MuenchenNetwork
 		
     connections:
         for i=0..nClients-1 {
-            client[i].pppg++ <--> C <--> clientRouter.pppg++;
+            client[i].ethg++ <--> C <--> clientRouter.ethg++;
         }
 //        for i=0..nTrains-1 {
-//            train[i].pppg++ <--> C <--> trainRouter.pppg++;
+//            train[i].ethg++ <--> C <--> trainRouter.ethg++;
 //        }
-
-        clientRouter.pppg++ <--> C <--> server.pppg++;
-        trainRouter.pppg++ <--> C <--> server.pppg++;
+        clientRouter.ethg++ <--> C <--> server.ethg++;
+        trainRouter.ethg++ <--> C <--> server.ethg++;
         
 }

@@ -41,6 +41,8 @@ void TumClientServerApp::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        numTrainUpdatesServedVec.setName("serverSentTrainUpdates");
+        numTrainUpdatesDroppedVec.setName("serverDroppedTrainUpdates");
         trainDropTimeLimit = par("trainDropTimeLimit");
 
         delay = par("replyDelay");
@@ -98,15 +100,23 @@ void TumClientServerApp::sendBack(cMessage *msg)
 }
 
 void TumClientServerApp::filterPackets(map<int, vector<TrainInfo>> &trackInfo) {
+    this->droppedUpdates = 0;
     for(auto it = trackInfo.begin(); it != trackInfo.end(); ++it ) {
         vector<TrainInfo>& trains = it->second;
         trains.erase(
             remove_if(trains.begin(), trains.end(), [&](TrainInfo info) {
                 double timeDiffSec = (simTime() - info.getTime()).dbl();
-                return timeDiffSec > this->trainDropTimeLimit; // Drop entries larger than 1 min
+                if (timeDiffSec > this->trainDropTimeLimit) { // Drop entries larger than 1 min
+                    this->droppedUpdates++;
+                    return true;
+                }
+                return false;
             }), trains.end()
         );
     }
+
+    numTrainUpdatesDroppedVec.record(this->droppedUpdates);
+    numTrainUpdatesDroppedStats.collect(this->droppedUpdates);
 }
 
 void TumClientServerApp::handleMessage(cMessage *msg)
@@ -205,6 +215,7 @@ void TumClientServerApp::finish()
 
     recordScalar("#bytesSent", bytesSent);
     recordScalar("#bytesRcvd", bytesRcvd);
-    numTrainUpdatesServedStats.recordAs("train updates sent");
+    numTrainUpdatesServedStats.recordAs("serverSentTrainUpdates");
+    numTrainUpdatesDroppedStats.recordAs("serverDroppedTrainUpdates");
 }
 

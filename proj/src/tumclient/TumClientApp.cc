@@ -44,6 +44,8 @@ void TumClientApp::initialize(int stage)
         WATCH(earlySend);
 
         const string tracksToRequestParameter = par("tracksToRequest");
+        timeToResponseVec.setName("timeToResponse");
+
         istringstream ss{tracksToRequestParameter};
         int track_no;
         this->tracksToRequest = vector<int>();
@@ -86,6 +88,7 @@ void TumClientApp::handleCrashOperation(LifecycleOperation *operation)
 void TumClientApp::sendRequest()
 {
     const auto& payload = makeShared<ClientPacket>();
+    this->timestampReq = simTime();
 
     Packet *packet = new Packet("data");
     payload->setTracks(this->tracksToRequest);
@@ -153,6 +156,11 @@ void TumClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
 void TumClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     TcpAppBase::socketDataArrived(socket, msg, urgent);
+    simtime_t now = simTime();
+
+    timeToResponseStats.collect(now - this->timestampReq);
+    timeToResponseVec.record(now - this->timestampReq);
+
 
     if (numRequestsToSend > 0) {
         EV_INFO << "reply arrived\n";
@@ -195,3 +203,9 @@ void TumClientApp::socketFailure(TcpSocket *socket, int code)
         rescheduleAfterOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
+
+void TumClientApp::finish()
+{
+    timeToResponseStats.recordAs("timeToResponse");
+}
+
