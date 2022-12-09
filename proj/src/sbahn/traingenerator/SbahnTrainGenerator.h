@@ -32,14 +32,17 @@ private:
    std::ifstream trainIn;
    std::string connectionType, trainRouterPattern, portName;
 
-   int nTrains, curTrainIndex;
+   int nTrains, nActiveTrains, curTrainIndex;
+
+   int peekedTime;
 
    const int NEW_TRAIN = 1, DELETE_TRAIN = 2;
    const char* VEC_NAME = "train";
 
    void createNextTrains();
-   void addTrain(cModule *parent, int bonnIndex, int route);
-//   void deleteTrain();
+   int addTrain(cModule *parent, int bonnIndex, int route);
+   int getValidVectorIndex(cModule *parent);
+   void deleteTrain(int index);
 protected:
     virtual void initialize(int stages) override;
     virtual void handleMessage(cMessage *msg) override;

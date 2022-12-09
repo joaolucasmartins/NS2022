@@ -154,7 +154,7 @@ void TumTrainServerApp::processStop()
 void TumTrainServerApp::processPacket(Packet *pk)
 {
     auto chunk = pk->peekData();
-    const auto& msg = static_cast<const TrainPacket*>(chunk.get());
+    const auto& msg = static_cast<const DelTrainSelfPacket*>(chunk.get());
     EV_INFO << "Received train update from track id " << msg->getTrackId() << " and train id " << msg->getTrainId() << endl;
 
     // Get Info from packet and put it in map

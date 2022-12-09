@@ -15,9 +15,9 @@
 
 #include "TrainPacket.h"
 
-TrainPacket::TrainPacket() {
+DelTrainSelfPacket::DelTrainSelfPacket() {
 }
 
-TrainPacket::~TrainPacket() {
+DelTrainSelfPacket::~DelTrainSelfPacket() {
 }
 

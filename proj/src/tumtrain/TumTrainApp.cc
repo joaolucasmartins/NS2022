@@ -27,6 +27,8 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
+#include <iostream>
+
 Define_Module(TumTrainApp);
 
 TumTrainApp::~TumTrainApp()
@@ -47,6 +49,8 @@ void TumTrainApp::initialize(int stage)
 
         trackId = getParentModule()->par("trackId");
         getParentModule()->getDisplayString().setTagArg("i", 0, ("trains/s" + std::to_string(trackId)).c_str());
+
+        std::cout << ("trains/s" + std::to_string(trackId)) << std::endl;
 
         trainId =  getParentModule()->par("trainId");
         if (trainId == -1)
@@ -122,7 +126,7 @@ void TumTrainApp::sendPacket()
     Packet *packet = new Packet(str.str().c_str());
     if (dontFragment)
         packet->addTag<FragmentationReq>()->setDontFragment(true);
-    const auto& payload = makeShared<TrainPacket>();
+    const auto& payload = makeShared<DelTrainSelfPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
 

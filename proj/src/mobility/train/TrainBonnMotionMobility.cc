@@ -15,6 +15,8 @@
 
 #include "TrainBonnMotionMobility.h"
 
+#include <iostream>
+
 Define_Module(TrainBonnMotionMobility);
 
 void TrainBonnMotionMobility::initialize(int stage) {
@@ -24,6 +26,7 @@ void TrainBonnMotionMobility::initialize(int stage) {
     if (stage == inet::INITSTAGE_LOCAL) {
         is3D = par("is3D");
         int nodeId = getParentModule()->par("trainId");
+        std::cout << "Bonn nodeId: " << std::endl;
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();
         const char *fname = par("traceFile");

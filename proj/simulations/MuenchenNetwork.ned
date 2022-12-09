@@ -68,8 +68,7 @@ network MuenchenNetwork
 
 		trainNetworkGenerator: SbahnTrainGenerator {
 			@display("p=100, 300");
-			trainRouterPattern = "*.trainRouter";
-			connectionType = "inet.node.ethernet.Eth100M";
+			trainRouterPattern = "^.trainRouter";
 			portName = "ethg";
 		}
 
