@@ -22,7 +22,7 @@ def openDatasets(config_name):
 
 def filterMetrics(sca_df, vec_df):
     # Vectors - parse vec dataset
-    linkLayerThroughput = lambda x: (x["name"] == "txPk:vector(packetBytes)") & (x["type"] == "vector")
+    linkLayerThroughput = lambda x: (x["name"] == "txPk:vector(packetBytes)") & (type not in x or (x["type"] == "vector"))
     appLayerThroughput = lambda x: (x["name"].str.contains("DataRate")) & (x["type"] == "vector") #  (x["module"].str.contains("Router")) => Use this to filter only router
     clientResponseDelay = lambda x: x["name"] == "timeToResponse"
     serverSentTrainUpdates = lambda x: (x["name"] == "serverSentTrainUpdates")
@@ -50,7 +50,7 @@ def filterMetrics(sca_df, vec_df):
     if "type" in select_sca:
         select_sca = select_sca.drop(["type", "attrname", "attrvalue", "value", "underflows", "overflows"], axis=1)
 
-    return select_vec, select_sca
+    return select_sca, select_vec
 
 
 def saveCsv(sca_df, vec_df, config_name):
