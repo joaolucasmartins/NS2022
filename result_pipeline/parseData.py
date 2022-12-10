@@ -72,6 +72,14 @@ def filterMetrics(sca_df, vec_df):
 
     return select_sca, select_vec
 
+def addStatistics(df, colname):
+    import numpy as np
+    df[colname + "_std"] = df[colname].apply(lambda x: np.std(x))
+    df[colname + "_max"] = df[colname].apply(lambda x: np.max(x))
+    df[colname + "_min"] = df[colname].apply(lambda x: np.min(x))
+    df[colname + "_mean"] = df[colname].apply(lambda x: np.mean(x))
+    df[colname + "_avg"] = df[colname].apply(lambda x: np.average(x))
+
 def saveCsv(sca_df, vec_df, config_name):
     sca_df.to_csv(config_name + "_sca.csv")
     vec_df.to_csv(config_name + "_vec.csv")
@@ -84,5 +92,8 @@ if (__name__ == "__main__"):
         usage()
     convertToCsv(argv[1], argv[2])
     sca_df, vec_df = openDatasets(argv[2])
+    sca_df, vec_df = filterNans(sca_df, vec_df)
+    sca_df, vec_df = convertValsToList(sca_df, vec_df)
     sca_df, vec_df = filterMetrics(sca_df, vec_df)
+    addStatistics(vec_df, "vecvalue")
     saveCsv(sca_df, vec_df, argv[2])
