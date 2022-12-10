@@ -17,12 +17,29 @@ def convertToCsv(config_path, config_name):
 def openDatasets(config_name):
     sca = pd.read_csv(config_name + "_sca.csv")
     vec = pd.read_csv(config_name + "_vec.csv")
+
+    # Convert string lists into actual lists
     return sca, vec
+
+def convertValsToList(sca_df, vec_df):
+    def convertVecToList(df, colname):
+        df[colname] = df[colname].apply(lambda x: [x] if isinstance(x, float) else list(map(float, x.split())))
+
+    convertVecToList(sca_df, "binedges")
+    convertVecToList(sca_df, "binvalues")
+    convertVecToList(vec_df, "vectime")
+    convertVecToList(vec_df, "vecvalue")
+    return sca_df, vec_df
+
+def filterNans(sca_df, vec_df):
+    # Filter only entries that have data in them
+    vec_df = vec_df[vec_df["vecvalue"].notna()]
+    return sca_df, vec_df
 
 
 def filterMetrics(sca_df, vec_df):
     # Vectors - parse vec dataset
-    linkLayerThroughput = lambda x: (x["name"] == "txPk:vector(packetBytes)") & (x["type"] == "vector")
+    linkLayerThroughput = lambda x: (x["name"] == "txPk:vector(packetBytes)") & (type not in x or (x["type"] == "vector"))
     appLayerThroughput = lambda x: (x["name"].str.contains("DataRate")) & (x["type"] == "vector") #  (x["module"].str.contains("Router")) => Use this to filter only router
     clientResponseDelay = lambda x: x["name"] == "timeToResponse"
     serverSentTrainUpdates = lambda x: (x["name"] == "serverSentTrainUpdates")
@@ -45,13 +62,23 @@ def filterMetrics(sca_df, vec_df):
     select_vec = select_f(vec_df, vec_metrics)
     select_sca = select_f(sca_df, sca_metrics)
 
+    # Filter only entries that have data in them
+    select_vec = select_vec[select_vec["vecvalue"].notna()]
+
     if "type" in select_vec:
         select_vec = select_vec.drop(["type", "attrname", "attrvalue"], axis=1)
     if "type" in select_sca:
         select_sca = select_sca.drop(["type", "attrname", "attrvalue", "value", "underflows", "overflows"], axis=1)
 
-    return select_vec, select_sca
+    return select_sca, select_vec
 
+def addStatistics(df, colname):
+    import numpy as np
+    df[colname + "_std"] = df[colname].apply(lambda x: np.std(x))
+    df[colname + "_max"] = df[colname].apply(lambda x: np.max(x))
+    df[colname + "_min"] = df[colname].apply(lambda x: np.min(x))
+    df[colname + "_mean"] = df[colname].apply(lambda x: np.mean(x))
+    df[colname + "_avg"] = df[colname].apply(lambda x: np.average(x))
 
 def saveCsv(sca_df, vec_df, config_name):
     sca_df.to_csv(config_name + "_sca.csv")
@@ -65,5 +92,8 @@ if (__name__ == "__main__"):
         usage()
     convertToCsv(argv[1], argv[2])
     sca_df, vec_df = openDatasets(argv[2])
+    sca_df, vec_df = filterNans(sca_df, vec_df)
+    sca_df, vec_df = convertValsToList(sca_df, vec_df)
     sca_df, vec_df = filterMetrics(sca_df, vec_df)
+    addStatistics(vec_df, "vecvalue")
     saveCsv(sca_df, vec_df, argv[2])
