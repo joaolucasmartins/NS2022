@@ -3,24 +3,36 @@ import numpy as np
 
 import os
 import os.path
-SRC_DIR = 'muenchen'
-DEST_DIR = '../proj/simulations/mobility/'
-DEST_FILE = 'train_config.ini'
-BONN_DEST_FILE = 'bonn.movements'
+
+import export_trains_argparse
+
+args = export_trains_argparse.parse()
+
+SRC_DIR = args.srcDir
+DEST_DIR = args.destDir
+
+CONFIG_NAME = args.config
+
+DEST_FILE = CONFIG_NAME + '.ini'
+BONN_DEST_FILE = CONFIG_NAME + '.movements'
 
 SCALE_FACTOR = 1e5
 
-START_DAY = 'monday'
-END_DAY = 'monday'
-ROUTES = ['S1', 'S2', 'S3', 'S4', 'S6', 'S7', 'S8', 'S20']
-START_T = '07:00:00'
-END_T = '08:00:00'
+START_DAY = args.sDay
+START_T = args.sTime
+END_DAY = args.eDay
+END_T = args.eTime
 
-INITIAL_X = 1000
-INITIAL_Y = 200
+ROUTES = args.routes
 
-FINAL_X = 1200
-FINAL_Y = 200
+
+INITIAL_X = args.ix
+INITIAL_Y = args.iy
+
+FINAL_X = args.fx
+FINAL_Y = args.fy
+
+
 
 stops_cols = {
     'stop_name': str,
@@ -65,7 +77,7 @@ def normalize_lon(lon: float) -> float:
     global max_lon
     return lon*SCALE_FACTOR - min_lon
 
-days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 START_T = parseTime(START_T) + days.index(START_DAY) * 24 * 3600
 END_T = parseTime(END_T) + days.index(END_DAY) * 24 * 3600
@@ -109,11 +121,15 @@ if trip_start_t != None:
 # Sort by start time
 trains.sort(key=lambda row: row[0])
 
+# Logging
+print(f'Generated config')
 
 # Export to file
 f = open(os.path.join(DEST_DIR, DEST_FILE), 'w')
 bf = open(os.path.join(DEST_DIR, BONN_DEST_FILE), 'w')
-f.write(f'*.nTrains = {len(trains)}\n\n')
+f.write(f'*.nTrains = {len(trains)}\n')
+f.write(f'*.train[*].mobility.traceFile = "mobility/{BONN_DEST_FILE}"\n\n')
+
 i = 0
 for start_time, end_time, route, bonn in trains:
     # f.write(f'{start_time} {end_time} {int(route[1:])}\n')
