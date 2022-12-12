@@ -27,8 +27,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
-#include <iostream>
-
 Define_Module(TumTrainApp);
 
 TumTrainApp::~TumTrainApp()
@@ -49,8 +47,6 @@ void TumTrainApp::initialize(int stage)
 
         trackId = getParentModule()->par("trackId");
         getParentModule()->getDisplayString().setTagArg("i", 0, ("trains/s" + std::to_string(trackId)).c_str());
-
-        std::cout << ("trains/s" + std::to_string(trackId)) << std::endl;
 
         trainId =  getParentModule()->par("trainId");
         if (trainId == -1)
