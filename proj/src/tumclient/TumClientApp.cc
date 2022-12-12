@@ -38,6 +38,7 @@ void TumClientApp::initialize(int stage)
 {
     TcpAppBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+
         numRequestsToSend = 0;
         earlySend = false;
         WATCH(numRequestsToSend);

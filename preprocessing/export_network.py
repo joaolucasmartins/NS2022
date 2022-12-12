@@ -7,6 +7,7 @@ import networkx as nx
 import os
 import os.path
 SRC_DIR = 'muenchen'
+OUT_FILE = '../proj/simulations/sbahn/muenchen_sbahn.txt'
 
 SCALE_FACTOR = 1e5
 
@@ -86,6 +87,9 @@ data = pd.merge(stop_times, trips.loc[:, ['trip_id', 'route_id', 'service_id']],
     .merge(calendar.loc[:, ['service_id', 'tuesday']], on='service_id', how='inner')\
     .sort_values(by=['trip_id', 'stop_sequence'])
 
+def sbahn_to_enum(route: str) -> int:
+    return 1 << int(route[1:])
+
 last_stop = None
 for _, row in data.iterrows():
     if not (row['tuesday'] == 1):
@@ -94,8 +98,9 @@ for _, row in data.iterrows():
     cur_stop = row['stop_id']
 
     if row['stop_sequence'] != 0:
-        G.add_edge(last_stop, cur_stop, route=row['route_short_name'])
-        # G.add_edge(last_stop, cur_stop)
+        if not G.has_edge(last_stop, cur_stop):
+            G.add_edge(last_stop, cur_stop, routes=0)
+        G.edges[last_stop, cur_stop]['routes'] |= sbahn_to_enum(row['route_short_name'])
 
     last_stop = cur_stop
 
@@ -127,17 +132,17 @@ for a, b in edges_to_nuke:
 print('Nodes:', G.number_of_nodes())
 print('Edges:', G.number_of_edges())
 
-
-f_nodes = open('muenchen_sbahn_nodes.ned', 'w')
+f = open(OUT_FILE, 'w')
+f.write(f'{(max_lat - min_lat):.0f} {(max_lon - min_lon):.0f}\n')
+f.write(f'{G.number_of_nodes()}\n')
 for n in G.nodes():
+    degree = G.degree[n]
     x = G.nodes[n]['pos'][0]
     y = G.nodes[n]['pos'][1]
     name = G.nodes[n]['name'].replace('ä', 'ae').replace('ü', 'ue').replace('ö', 'oe').replace('ß', 'ss')
-    f_nodes.write(f'        stop_{n}: SbahnStop {{ parameters: x="{x:.0f}"; y="{y:.0f}"; stopName="{name}"; }}\n')
-f_nodes.close()
+    f.write(f'{n} {degree} {x:.0f} {y:.0f} {name}\n')
 
-f_connections = open('muenchen_sbahn_connections.ned', 'w')
-for start, end in G.edges():
-    f_connections.write(f'        stop_{start}.port++ <--> stop_{end}.port++;\n')
-f_connections.close()
-
+f.write(f'{G.number_of_edges()}\n')
+for start, end, edge_routes in G.edges.data('routes'):
+    f.write(f'{start} {end} {edge_routes}\n')
+f.close()
