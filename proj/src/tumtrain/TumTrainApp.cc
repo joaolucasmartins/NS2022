@@ -122,7 +122,7 @@ void TumTrainApp::sendPacket()
     Packet *packet = new Packet(str.str().c_str());
     if (dontFragment)
         packet->addTag<FragmentationReq>()->setDontFragment(true);
-    const auto& payload = makeShared<DelTrainSelfPacket>();
+    const auto& payload = makeShared<TrainSelfPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
 
