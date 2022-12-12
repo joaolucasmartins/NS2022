@@ -33,6 +33,7 @@ network MuenchenNetwork
 {
     parameters:
         int nClients;
+        int nTrains;
         @display("bgb=93253,52926;bgi=maps/muenchen,s;");
     
     types:
@@ -46,7 +47,7 @@ network MuenchenNetwork
             parameters:
                 @display("i=device/laptop;p=250,100,col,100;");
         }
-        train[0]: TumTrain { @dynamic; }
+        train[nTrains]: TumTrain;
         server: TumServer {
         	parameters:
         	    @display("p=400,250;i=device/pc2");
@@ -66,15 +67,12 @@ network MuenchenNetwork
         	disable = false;
         };
 
-		trainNetworkGenerator: SbahnTrainGenerator {
-			@display("p=100, 300");
-			trainRouterPattern = "^.trainRouter";
-			portName = "ethg";
-		}
-
     connections:
         for i=0..nClients-1 {
             client[i].ethg++ <--> C <--> clientRouter.ethg++;
+        }
+        for i=0..nTrains-1 {
+            train[i].ethg++ <--> C <--> trainRouter.ethg++;
         }
 
         clientRouter.ethg++ <--> C <--> server.ethg++;

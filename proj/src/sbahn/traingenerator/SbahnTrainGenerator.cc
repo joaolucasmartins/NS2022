@@ -54,14 +54,10 @@ void SbahnTrainGenerator::createNextTrains() {
         int slot = addTrain(parent, curTrainIndex++, route);
         nActiveTrains++;
 
-        std::cout << "ADDED TRAIN" << std::endl;
-
         simtime_t simtime_end = SimTime(endTime, SimTimeUnit::SIMTIME_S);
 
         cMessage *delMsg = new cMessage(std::to_string(slot).c_str(), DELETE_TRAIN);
         scheduleAt(simtime_end, delMsg);
-
-        std::cout << "SCHEDULED" << std::endl;
 
         trainIn >> peekedTime;
         simtime_peeked = SimTime(peekedTime, SimTimeUnit::SIMTIME_S);
@@ -123,8 +119,6 @@ int SbahnTrainGenerator::addTrain(cModule *parent, int bonnIndex, int route) {
     cGate *moduleGateIn, *moduleGateOut, *routerGateIn, *routerGateOut;
     module->getOrCreateFirstUnconnectedGatePair(portName.c_str(), false, true, moduleGateIn, moduleGateOut);
     router->getOrCreateFirstUnconnectedGatePair(portName.c_str(), false, true, routerGateIn, routerGateOut);
-
-    std::cout << moduleGateIn->getFullPath() << std::endl;
 
     if (moduleGateIn == nullptr || moduleGateOut == nullptr)
         throw cRuntimeError("SbahnTrainGenerator: Failed to retrieve the module's gates");
