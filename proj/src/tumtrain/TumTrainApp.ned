@@ -35,10 +35,7 @@ import inet.applications.contract.IApp;
 // statistic will contain the round-trip times.
 simple TumTrainApp like IApp
 {
-	parameters:
-	    int trainId = default(-1); // unique train identifier (-1: uses parent index)
-	    int trackId = default(2);
-	    
+	parameters:	    
         string interfaceTableModule;   // The path to the InterfaceTable module
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         int localPort = default(-1);  // local port (-1: use ephemeral port)

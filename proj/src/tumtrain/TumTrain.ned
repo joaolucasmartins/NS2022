@@ -19,4 +19,7 @@ import inet.node.inet.StandardHost;
 
 module TumTrain extends StandardHost
 {
+    parameters:
+	    int trainId = default(-1); // unique train identifier (-1: uses parent index)
+	    int trackId = default(2);
 }

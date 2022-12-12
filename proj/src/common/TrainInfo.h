@@ -15,7 +15,7 @@ private:
 public:
   TrainInfo() {}
 
-  TrainInfo(const TrainPacket *packet) : train_id(packet->getTrainId()), track_id(packet->getTrackId()),
+  TrainInfo(const TrainSelfPacket *packet) : train_id(packet->getTrainId()), track_id(packet->getTrackId()),
     lat(packet->getLat()), lon(packet->getLon()) {}
 
   simtime_t getTime() const {

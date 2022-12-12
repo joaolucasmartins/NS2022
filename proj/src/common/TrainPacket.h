@@ -21,13 +21,13 @@
 using namespace inet;
 using namespace std;
 
-class TrainPacket : public FieldsChunk {
+class TrainSelfPacket : public FieldsChunk {
 private:
     int trainId, trackId;
     float lat, lon;
 public:
-    TrainPacket();
-    virtual ~TrainPacket();
+    TrainSelfPacket();
+    virtual ~TrainSelfPacket();
 
     float getLat() const { return lat; }
     void setLat(float lat) { this->lat = lat; }
