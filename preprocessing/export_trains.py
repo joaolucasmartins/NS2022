@@ -122,7 +122,7 @@ if trip_start_t != None:
 trains.sort(key=lambda row: row[0])
 
 # Logging
-print(f'Generated config')
+print(f'Generated config {CONFIG_NAME} with {len(trains)} trains')
 
 # Export to file
 f = open(os.path.join(DEST_DIR, DEST_FILE), 'w')
