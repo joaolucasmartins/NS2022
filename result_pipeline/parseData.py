@@ -2,6 +2,7 @@
 
 from sys import argv
 import pandas as pd
+import numpy as np
 
 def convertToCsv(config_path, config_name):
     import subprocess
@@ -72,6 +73,34 @@ def filterMetrics(sca_df, vec_df):
 
     return select_sca, select_vec
 
+
+def calcServerAppUtilization(vec_df):
+    def calcAppUtilization(throughput_df, channel_capacity, incoming):
+        utilization_df = throughput_df.copy()
+        utilization_df["vecvalue"] = utilization_df["vecvalue"].apply(lambda x: [i/channel_capacity for i in x])
+        if incoming:
+            direction = "incoming"
+        else:
+            direction = "outgoing"
+        utilization_df["name"] = direction + "appUtilization" + ":vector"
+        return utilization_df
+
+    appLayerThroughput = lambda x: (x["name"].str.contains("DataRate"))
+    filterByServer = lambda x: x["module"].str.contains("server")
+    filterByIncomingTraffic = lambda x: x["name"].str.contains("incoming")
+    # Calculate utilization and append it to vec dataframe
+    serverAppThroughputIncoming = vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))]
+    utilization_df = calcAppUtilization(serverAppThroughputIncoming, 100e6, incoming=True)
+    vec_df = pd.concat([utilization_df, vec_df]).sort_index()
+
+def addVecValuesToSca(sca_df):
+    # Merge Hists https://stackoverflow.com/questions/47085662/merge-histograms-with-different-ranges
+    def extract_vals(hist):
+        values = [[y]*int(x) for x, y in zip(hist[0], hist[1])]
+        return np.array([z for s in values for z in s])
+
+    sca_df["vecvalue"] = sca_df.apply(lambda x: extract_vals((x.binvalues, x.binedges)), axis=1)
+
 def addStatistics(df, colname):
     import numpy as np
     df[colname + "_std"] = df[colname].apply(lambda x: np.std(x))
@@ -95,5 +124,7 @@ if (__name__ == "__main__"):
     sca_df, vec_df = filterNans(sca_df, vec_df)
     sca_df, vec_df = convertValsToList(sca_df, vec_df)
     sca_df, vec_df = filterMetrics(sca_df, vec_df)
+    calcServerAppUtilization(vec_df)
+    addVecValuesToSca(sca_df)
     addStatistics(vec_df, "vecvalue")
     saveCsv(sca_df, vec_df, argv[2])
