@@ -38,6 +38,7 @@ network MuenchenNetwork
     
     types:
         channel C extends Eth100M {}
+        channel TC extends Eth100M { @display("ls=lightgray,0.25"); }
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -72,7 +73,7 @@ network MuenchenNetwork
             client[i].ethg++ <--> C <--> clientRouter.ethg++;
         }
         for i=0..nTrains-1 {
-            train[i].ethg++ <--> C <--> trainRouter.ethg++;
+            train[i].ethg++ <--> TC <--> trainRouter.ethg++;
         }
 
         clientRouter.ethg++ <--> C <--> server.ethg++;
