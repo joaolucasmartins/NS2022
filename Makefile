@@ -1,6 +1,21 @@
-.PHONY: clean
+.PHONY: clean cleanall preprocessing mobility_configs all
 
-# https://stackoverflow.com/questions/24736146/how-to-use-virtualenv-in-makefile
+all: preprocessing
+
+omnet:
+	@echo "Nani should I do here?"
+
+preprocessing: mobility_configs
+
+preprocessing/muenchen: preprocessing/original preprocessing/preprocessing.py venv
+	. venv/bin/activate && cd preprocessing && python preprocessing.py
+
+mobility_configs: preprocessing/muenchen venv
+	mkdir preprocessing/muenchen -p
+	. venv/bin/activate && python preprocessing/export_trains.py offPeak mon 10:00:00 mon 12:00:00
+	. venv/bin/activate && python preprocessing/export_trains.py rushHour mon 06:00:00 mon 08:00:00
+	. venv/bin/activate && python preprocessing/export_trains.py weekend sat 10:00:00 sat 12:00:00
+
 venv: venv/touchfile
 
 venv/touchfile: requirements.txt
@@ -9,8 +24,12 @@ venv/touchfile: requirements.txt
 	@touch venv/touchfile
 
 test: venv
-	@chmod +x venv/bin/activate
 	. venv/bin/activate && python test.py
 
 clean:
+	rm -rf *\__pycache__
+
+cleanall: clean
 	rm -rf venv
+	rm -rf preprocessing/muenchen
+	cd proj/simulations/mobility && rm -f offPeak.* rushHour.* weekend.*
