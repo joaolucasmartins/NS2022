@@ -45,6 +45,7 @@ __pycache__
 result_pipeline/*.csv
 result_pipeline/plots
 proj/simulations/*.anf
+proj/simulations/.cmdenv-log
 
 # Files automatically generated
 preprocessing/muenchen/
