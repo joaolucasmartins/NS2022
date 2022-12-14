@@ -20,14 +20,20 @@
 
 Define_Module(SbahnNetworkGenerator);
 
-void SbahnNetworkGenerator::initialize(int stage)
+void SbahnNetworkGenerator::initialize()
 {
-    if (!par("disable"))
+    if (!par("disable") && hasGUI()) {
         parseFile();
+    }
 }
 
 void SbahnNetworkGenerator::parseFile() {
-    cModule *parent = getParentModule();
+    fGroup = new cGroupFigure("networkMap");
+    getParentModule()->getCanvas()->addFigure(fGroup);
+    fGroup->lowerToBottom();
+
+    cGroupFigure *connGroup = new cGroupFigure("connections");
+    fGroup->addFigure(connGroup);
 
     std::string filename = par("filename");
     std::ifstream in(filename, std::ios::in);
@@ -44,7 +50,7 @@ void SbahnNetworkGenerator::parseFile() {
         in >> id >> degree >> lat >> lon;
         std::getline(in, name);
 
-        addStop(parent, id, degree, lon, lat, name);
+        addStop(id, degree, lon, lat, name);
     }
 
     in >> nEdges;
@@ -55,50 +61,42 @@ void SbahnNetworkGenerator::parseFile() {
         addConnection(a, b, routes);
     }
 
-    stops.clear();
+    stopsX.clear();
+    stopsY.clear();
 }
 
-void SbahnNetworkGenerator::addStop(cModule *node, int id, int degree, int lat, int lon, const std::string &name) {
-    // find factory object
-    cModuleType *moduleType = cModuleType::get("tum.sbahn.stop.SbahnStop");
 
-    // create (possibly compound) module and build its submodules (if any)
-    cModule *module = moduleType->create(("s_" + std::to_string(id)).c_str(), node);
+void SbahnNetworkGenerator::addStop(int id, int degree, int lat, int lon, const std::string &name) {
+    cFigure::Point p((double) lon, (double) lat);
 
-    // set up parameters and gate sizes before we set up its submodules
-    // parameters: x="74874"; y="5988"; stopName="Flughafen Terminal";
-    module->par("x") = std::to_string(lon);
-    module->par("y") = std::to_string(lat);
-    module->par("stopName") = name;
-    module->finalizeParameters();
+    auto *icon = new cIconFigure((std::to_string(id)+ "_icon").c_str());
+    icon->setImageName("sbahn");
+//    icon->setSize(512, 512);
+    icon->setPosition(p);
+    fGroup->addFigure(icon);
 
-    module->setGateSize("port", degree);
+    stopsX[id] = p.x;
+    stopsY[id] = p.y;
 
-    // create internals, and schedule activation message
-    module->buildInside();
-    module->scheduleStart(simTime());
+    p.y += 200;
 
-    // add to map
-    stops[id] = module;
+    cLabelFigure *label = new cLabelFigure((std::to_string(id) + "_label").c_str());
+    label->setText(name.c_str());
+    label->setAlignment(cFigure::ALIGN_CENTER);
+    label->setPosition(p);
+    label->setAnchor(cFigure::ANCHOR_N);
+    label->setFont(cFigure::Font("Courier New"));
+    label->setOpacity(0.5);
+    fGroup->addFigure(label);
 }
 
 void SbahnNetworkGenerator::addConnection(int a, int b, int routes) {
-    cGate *aGateIn, *aGateOut, *bGateIn, *bGateOut;
-    stops[a]->getOrCreateFirstUnconnectedGatePair("port", false, false, aGateIn, aGateOut);
-    stops[b]->getOrCreateFirstUnconnectedGatePair("port", false, false, bGateIn, bGateOut);
-
-    aGateOut->connectTo(bGateIn);
-    bGateOut->connectTo(aGateIn);
-
-    aGateOut->getDisplayString().setTagArg("ls", 0, "#008D4F");
-    aGateOut->getDisplayString().setTagArg("ls", 1, "2");
-    aGateOut->getDisplayString().setTagArg("ls", 2, "d");
-
-    bGateOut->getDisplayString().setTagArg("ls", 0, "#008D4F");
-    bGateOut->getDisplayString().setTagArg("ls", 1, "2");
-    bGateOut->getDisplayString().setTagArg("ls", 2, "da");
-}
-
-int SbahnNetworkGenerator::numInitStages() const {
-    return 1;
+    cLineFigure *line = new cLineFigure("line");
+    line->setStart(cFigure::Point(stopsX[a], stopsY[a]));
+    line->setEnd(cFigure::Point(stopsX[b], stopsY[b]));
+    line->setLineWidth(2);
+    line->setLineOpacity(0.5);
+    line->setLineColor(cFigure::Color("#008D4F"));
+    line->setLineStyle(cFigure::LineStyle::LINE_DOTTED);
+    fGroup->getFigure("connections")->addFigure(line);
 }

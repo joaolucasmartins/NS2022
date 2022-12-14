@@ -29,14 +29,15 @@ using namespace omnetpp;
 class SbahnNetworkGenerator : public cSimpleModule
 {
 private:
-    std::map<int, cModule*> stops;
+    std::map<int, double> stopsX;
+    std::map<int, double> stopsY;
+    cGroupFigure *fGroup;
 
     void parseFile();
-    void addStop(cModule *node, int id, int degree, int lat, int lon, const std::string &name);
+    void addStop(int id, int degree, int lat, int lon, const std::string &name);
     void addConnection(int a, int b, int routes);
   protected:
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override;
+    virtual void initialize() override;
 };
 
 #endif
