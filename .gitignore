@@ -34,6 +34,9 @@
 # Python temporary files
 */__pycache__
 
+# Python virtual environment
+venv/
+
 # Temporary outputs
 preprocessing/muenchen_sbahn_nodes.ned
 preprocessing/muenchen_sbahn_connections.ned
