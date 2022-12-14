@@ -36,6 +36,7 @@
 
 # Python virtual environment
 venv/
+tum
 
 # Temporary outputs
 preprocessing/muenchen_sbahn_nodes.ned

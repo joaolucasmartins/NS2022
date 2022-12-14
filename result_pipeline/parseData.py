@@ -1,6 +1,7 @@
 #!/bin/python
 
 from sys import argv
+from os import mkdir
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -118,6 +119,10 @@ def addStatistics(df, colname):
     df[colname + "_avg"] = df[colname].apply(lambda x: np.average(x))
 
 def generatePlots(sca_df, vec_df, config_name):
+    try:
+        mkdir("plots")
+    except OSError as _:
+        pass
     # Set filters
 
     # By metric - This code is duplicated with the other script, a class to do this would be better
@@ -139,9 +144,9 @@ def generatePlots(sca_df, vec_df, config_name):
     filterByServer = lambda x: x["module"].str.contains("server")
 
     linePlots = [
-        ("appLayerOutputThroughput_fromClients", 100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))], "Bytes"),
+        ("appLayerOutputThroughput_fromClients", 100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))][:1], "Bytes"),
         ("appLayerOutputThroughput_toServers", 100, vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))], "Bytes"),
-        ("linkLayerOutputThroughput_fromClients", 0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))], "Bytes"),
+        ("linkLayerOutputThroughput_fromClients", 0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))][:1], "Bytes"),
         ("linkLayerOutputThroughput_toServers", 0, vec_df[(linkLayerThroughput(vec_df)) & (filterByServer(vec_df))], "Bytes"),
         ("appLayerUtilization_toServers", 100, vec_df[(appLayerUtilization(vec_df)) & (filterByServer(vec_df))], "%"),
         ("sentTrainUpdates_Server", 0, vec_df[serverSentTrainUpdates(vec_df)], "Nº Updates"),
