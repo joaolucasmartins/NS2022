@@ -35,8 +35,8 @@ def convertValsToList(sca_df, vec_df):
                 return np.asarray(list(x.split(" ")), dtype=float)
         df[colname] = df[colname].apply(convertStrToVec)
 
-    convertVecToList(sca_df, "binedges")
-    convertVecToList(sca_df, "binvalues")
+    #convertVecToList(sca_df, "binedges")
+    #convertVecToList(sca_df, "binvalues")
     convertVecToList(vec_df, "vectime")
     convertVecToList(vec_df, "vecvalue")
     return sca_df, vec_df
@@ -77,8 +77,8 @@ def filterMetrics(sca_df, vec_df):
 
     if "type" in select_vec:
         select_vec = select_vec.drop(["type", "attrname", "attrvalue"], axis=1)
-    if "type" in select_sca:
-        select_sca = select_sca.drop(["type", "attrname", "attrvalue", "value", "underflows", "overflows"], axis=1)
+    #if "type" in select_sca:
+        #select_sca = select_sca.drop(["type", "attrname", "attrvalue", "value", "underflows", "overflows"], axis=1)
 
     return select_sca, select_vec
 
@@ -133,7 +133,7 @@ def generatePlots(sca_df, vec_df, config_name):
     serverSentTrainUpdates = lambda x: (x["name"] == "serverSentTrainUpdates")
     serverDroppedTrainUpdates = lambda x: (x["name"] == "serverDroppedTrainUpdates")
     serverReceivedTrainUpdates = lambda x: (x["name"] == "serverReceivedTrainUpdates")
-    clientEndToEndDelay = lambda x: (x["name"] == "endToEndDelay:histogram")  & (x["module"].str.contains("client")) & (("type" not in x) or (x["type"] == "histogram"))
+    #clientEndToEndDelay = lambda x: (x["name"] == "endToEndDelay:histogram")  & (x["module"].str.contains("client")) & (("type" not in x) or (x["type"] == "histogram"))
     filterByIncomingTraffic = lambda x: x["name"].str.contains("incoming")
     filterByOutgoingTraffic = lambda x: x["name"].str.contains("outgoing")
     # By Module
@@ -156,7 +156,7 @@ def generatePlots(sca_df, vec_df, config_name):
 
     histPlots = [
         ("clientResponseDelay", vec_df[clientResponseDelay(vec_df)]),
-        ("clientEndToEndDelay", sca_df[clientEndToEndDelay(sca_df)])
+        #("clientEndToEndDelay", sca_df[clientEndToEndDelay(sca_df)])
     ]
 
     for title, NBins, data, unit in linePlots:
@@ -241,7 +241,7 @@ if (__name__ == "__main__"):
     sca_df, vec_df = convertValsToList(sca_df, vec_df)
     sca_df, vec_df = filterMetrics(sca_df, vec_df)
     vec_df = calcServerAppUtilization(vec_df)
-    addVecValuesToSca(sca_df)
+    #addVecValuesToSca(sca_df)
     addStatistics(vec_df, "vecvalue")
     generatePlots(sca_df,  vec_df, argv[2])
     saveCsv(sca_df, vec_df, argv[2])
