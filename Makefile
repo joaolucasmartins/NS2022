@@ -1,9 +1,24 @@
-.PHONY: clean cleanall all
+.PHONY: clean cleanall all omnet
 
 all: mobility_configs
 
-omnet:
-	@echo "Nani should I do here?"
+
+inet:
+	cd ../inet4.4 && make
+
+tum: inet
+	cd proj/ && make
+
+simulations: tum mobility_configs
+	cd proj/simulations && ../tum\
+		-n .:../src:../../../inet4.4/src \
+		-l ../../../inet4.4/src/INET \
+		-u Cmdenv \
+		-c Default \
+		-r 0 \
+		-s \
+		-f omnetpp.ini
+
 
 
 # ---------- PREPROCESSING ----------
