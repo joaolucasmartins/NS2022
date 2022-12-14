@@ -1,9 +1,0 @@
-route_long_name,route_short_name,agency_id,route_type,route_id
-S1,S1,73,2,134
-S2,S2,73,2,94
-S20,S20,73,2,773
-S3,S3,73,2,135
-S4,S4,73,2,132
-S6,S6,73,2,34
-S7,S7,73,2,105
-S8,S8,73,2,11
