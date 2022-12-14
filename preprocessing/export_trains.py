@@ -129,6 +129,7 @@ f = open(os.path.join(DEST_DIR, DEST_FILE), 'w')
 bf = open(os.path.join(DEST_DIR, BONN_DEST_FILE), 'w')
 f.write(f'*.nTrains = {len(trains)}\n')
 f.write(f'*.train[*].mobility.traceFile = "mobility/{BONN_DEST_FILE}"\n\n')
+f.write(f'sim-time-limit = {END_T - START_T}s\n\n')
 
 i = 0
 for start_time, end_time, route, bonn in trains:
