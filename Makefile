@@ -5,17 +5,29 @@ all: preprocessing
 omnet:
 	@echo "Nani should I do here?"
 
-preprocessing: mobility_configs
 
-preprocessing/muenchen: preprocessing/original preprocessing/preprocessing.py venv
+# ---------- PREPROCESSING ----------
+preprocessing: preprocessing/muenchen/denormalized.csv mobility_configs
+
+preprocessing/muenchen/denormalized.csv: preprocessing/original preprocessing/preprocessing.py venv
 	. venv/bin/activate && cd preprocessing && python preprocessing.py
 
-mobility_configs: preprocessing/muenchen venv
-	mkdir preprocessing/muenchen -p
-	. venv/bin/activate && python preprocessing/export_trains.py offPeak mon 10:00:00 mon 12:00:00
-	. venv/bin/activate && python preprocessing/export_trains.py rushHour mon 06:00:00 mon 08:00:00
-	. venv/bin/activate && python preprocessing/export_trains.py weekend sat 10:00:00 sat 12:00:00
+proj/simulations/mobility:
+	mkdir proj/simulations/mobility -p
 
+mobility_configs: proj/simulations/mobility/offPeak.ini proj/simulations/mobility/rushHour.ini proj/simulations/mobility/weekend.ini
+
+proj/simulations/mobility/offPeak.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv venv
+	. venv/bin/activate && cd preprocessing && python export_trains.py offPeak mon 14:00:00 mon 16:00:00
+
+proj/simulations/mobility/rushHour.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv venv
+	. venv/bin/activate && cd preprocessing && python export_trains.py rushHour mon 06:00:00 mon 08:00:00
+
+proj/simulations/mobility/weekend.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv venv
+	. venv/bin/activate && cd preprocessing && python export_trains.py weekend sat 10:00:00 sat 12:00:00
+
+
+# ---------- Python Virtual Env ----------
 venv: venv/touchfile
 
 venv/touchfile: requirements.txt

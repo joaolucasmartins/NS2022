@@ -43,3 +43,8 @@ preprocessing/muenchen_sbahn_connections.ned
 __pycache__
 result_pipeline/*.csv
 result_pipeline/plots
+
+
+# Files automatically generated
+preprocessing/muenchen/
+proj/simulations/mobility/
