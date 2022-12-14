@@ -1,18 +1,22 @@
 .PHONY: clean cleanall all omnet
 
+
+INET = ~/Documents/tum/ns/inet4.4
+
+
 all: mobility_configs
 
 
 inet:
-	cd ../inet4.4 && make
+	cd ${INET} && make
 
 tum: inet
 	cd proj/ && make
 
 simulations: tum mobility_configs
 	cd proj/simulations && ../tum\
-		-n .:../src:../../../inet4.4/src \
-		-l ../../../inet4.4/src/INET \
+		-n .:../src:${INET}/src \
+		-l ${INET}/src/INET \
 		-u Cmdenv \
 		-c Default \
 		-r 0 \
