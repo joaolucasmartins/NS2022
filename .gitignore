@@ -39,3 +39,4 @@ preprocessing/muenchen_sbahn_nodes.ned
 preprocessing/muenchen_sbahn_connections.ned
 __pycache__
 result_pipeline/*.csv
+result_pipeline/plots
