@@ -9,16 +9,15 @@ CONFIGURATIONS := Default NonFrequentUpdates Scalability
 all: mobility_configs
 
 
-
 # ---------- COMPILING ----------
-.PHONY: inet simulations sim${CONFIGURATIONS}
+.PHONY: inet simulations
 inet:
 	cd ${INET} && make
 
 proj/tum: inet
 	cd proj/ && make
 
-simulations: proj/simulations/$(CONFIGURATIONS)
+simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability
 
 proj/simulations/Default: proj/tum mobility_configs
 	cd proj/simulations && ../tum\
