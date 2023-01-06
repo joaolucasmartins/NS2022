@@ -19,7 +19,7 @@ import inet.node.inet.StandardHost;
 
 import simu5g.nodes.NR.NRUe;
 
-module TumTrain extends StandardHost
+module TumTrain5G extends NRUe
 {
     parameters:
 	    int trainId = default(-1); // unique train identifier (-1: uses parent index)

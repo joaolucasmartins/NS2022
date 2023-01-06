@@ -25,6 +25,7 @@ import inet.node.inet.Router;
 
 import tum.tumclient.TumClient;
 import tum.tumtrain.TumTrain;
+import tum.tumtrain.TumTrain5G;
 import tum.tumserver.TumServer;
 
 import tum.sbahn.networkgenerator.SbahnNetworkGenerator;
@@ -51,7 +52,7 @@ network MuenchenNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,100;is=s;");
+                @display("p=20000,20000");
         }
         client[nClients]: TumClient {
             parameters:
@@ -70,11 +71,8 @@ network MuenchenNetwork
         	parameters:
         	    @display("p=425,150");
         }
-        channelControl: LteChannelControl {
-            @display("p=50,25;is=s");
-        }
         carrierAggregation: CarrierAggregation {
-            @display("p=50.993748,258.7;is=s");
+            @display("p=16000,16000;is=s");
         }
         binder: Binder {
             @display("p=50,175;is=s");
@@ -89,9 +87,8 @@ network MuenchenNetwork
             parameters: 
                 @display("p=20000,20000;is=vl");
         }
-        train5G[1]: TumTrain {
+        train5G[1]: TumTrain5G {
             parameters:
-                with5G = true;
                 @display("i=device/laptop;p=21000,21000");
         }
         
@@ -99,7 +96,10 @@ network MuenchenNetwork
             @display("p=100,200");
         	filename = "sbahn/muenchen_sbahn.txt";
         	disable = false;
-        };
+        }
+        channelControl: LteChannelControl {
+            @display("p=15000,15000;is=s");
+        }
 
     connections:
         for i=0..nClients-1 {
