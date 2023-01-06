@@ -20,6 +20,7 @@ package tum.simulations;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth10G;
 import inet.node.inet.Router;
 
 import tum.tumclient.TumClient;
@@ -28,6 +29,14 @@ import tum.tumserver.TumServer;
 
 import tum.sbahn.networkgenerator.SbahnNetworkGenerator;
 import tum.sbahn.traingenerator.SbahnTrainGenerator;
+
+import simu5g.common.binder.Binder;
+import simu5g.common.carrierAggregation.CarrierAggregation;
+import simu5g.nodes.Upf;
+import simu5g.nodes.NR.gNodeB;
+//import simu5g.nodes.NR.NRUe;
+//import simu5g.nodes.backgroundCell.BackgroundCell;
+import simu5g.world.radio.LteChannelControl;
 
 network MuenchenNetwork
 {
@@ -61,6 +70,30 @@ network MuenchenNetwork
         	parameters:
         	    @display("p=425,150");
         }
+        channelControl: LteChannelControl {
+            @display("p=50,25;is=s");
+        }
+        carrierAggregation: CarrierAggregation {
+            @display("p=50.993748,258.7;is=s");
+        }
+        binder: Binder {
+            @display("p=50,175;is=s");
+        }
+        upf: Upf {
+            @display("p=20000,15000");
+        }
+        iUpf: Upf {
+            @display("p=15000,15000");
+        }
+        gnb: gNodeB {
+            parameters: 
+                @display("p=20000,20000;is=vl");
+        }
+        train5G[1]: TumTrain {
+            parameters:
+                with5G = true;
+                @display("i=device/laptop;p=21000,21000");
+        }
         
         sbahnNetworkGenerator: SbahnNetworkGenerator {
             @display("p=100,200");
@@ -72,11 +105,14 @@ network MuenchenNetwork
         for i=0..nClients-1 {
             client[i].ethg++ <--> C <--> clientRouter.ethg++;
         }
-        for i=0..nTrains-1 {
-            train[i].ethg++ <--> TC <--> trainRouter.ethg++;
-        }
+//        for i=0..nTrains-1 {
+//            train[i].ethg++ <--> TC <--> trainRouter.ethg++;
+//        }
+        trainRouter.pppg++ <--> Eth10G <--> upf.filterGate;
 
         clientRouter.ethg++ <--> C <--> server.ethg++;
         trainRouter.ethg++ <--> C <--> server.ethg++;
         
+        upf.pppg++ <--> Eth10G <--> iUpf.pppg++;
+        iUpf.pppg++ <--> Eth10G <--> gnb.ppp;
 }

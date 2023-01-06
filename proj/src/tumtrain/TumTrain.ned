@@ -17,9 +17,14 @@ package tum.tumtrain;
 
 import inet.node.inet.StandardHost;
 
+import simu5g.nodes.NR.NRUe;
+
 module TumTrain extends StandardHost
 {
     parameters:
 	    int trainId = default(-1); // unique train identifier (-1: uses parent index)
 	    int trackId = default(2);
+	    bool with5G = default(false);
+    submodules:
+        ue: NRUe if with5G;
 }
