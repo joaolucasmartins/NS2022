@@ -34,7 +34,7 @@ network MuenchenNetwork
     parameters:
         int nClients;
         int nTrains;
-        @display("bgb=93253,52926;bgi=maps/muenchen,s;");
+        @display("bgi=maps/muenchen,s;");
     
     types:
         channel C extends Eth100M {}
