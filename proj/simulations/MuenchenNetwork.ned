@@ -42,31 +42,33 @@ network MuenchenNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,100;is=s;");
+                @display("p=500,500;is=s;");
         }
-        client[nClients]: TumClient {
-            parameters:
-                @display("i=device/laptop;p=250,100,col,100;");
-        }
-        train[nTrains]: TumTrain;
-        server: TumServer {
-        	parameters:
-        	    @display("p=400,250;i=device/pc2");
-        }
-        clientRouter: Router {
-        	parameters:
-        	    @display("p=375,150");
-        }
-        trainRouter: Router {
-        	parameters:
-        	    @display("p=425,150");
-        }
-        
         sbahnNetworkGenerator: SbahnNetworkGenerator {
-            @display("p=100,200");
+            @display("p=500,1000;is=s;i=block/wheelbarrow");
         	filename = "sbahn/muenchen_sbahn.txt";
         	disable = false;
         };
+        
+        client[nClients]: TumClient {
+            parameters:
+                @display("is=vs;i=device/pocketpc;p=6000,1000,m,10,250,250;");
+        }
+        train[nTrains]: TumTrain;
+
+        server: TumServer {
+        	parameters:
+        	    @display("p=3000,2000;i=device/server");
+        }
+        clientRouter: Router {
+        	parameters:
+        	    @display("p=3500,3000;i=device/smallrouter");
+        }
+        trainRouter: Router {
+        	parameters:
+        	    @display("p=2500,3000;i=device/smallrouter");
+        }
+        
 
     connections:
         for i=0..nClients-1 {
