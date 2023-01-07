@@ -1,7 +1,7 @@
 #!/bin/python
 
 from sys import argv
-from os import mkdir
+from os import mkdir, path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -120,7 +120,7 @@ def addStatistics(df, colname):
 
 def generatePlots(sca_df, vec_df, config_name):
     try:
-        mkdir("plots")
+        mkdir(path.join("plots", config_name))
     except OSError as _:
         pass
     # Set filters
@@ -216,7 +216,9 @@ def plotLine(text_info, N, data, unit, config_name):
     ax.legend(labels=data[["module"]].to_numpy())
     ax.set_xlabel(x_text)
     ax.set_ylabel(y_text)
-    plt.savefig("plots/" + config_name + "_" + title, bbox_inches='tight', dpi=400)
+    
+    plt.savefig(path.join("plots", config_name, config_name + "_" + title),
+        bbox_inches='tight', dpi=400)
 
 
 def drawHist(text_info, data, config_name):
@@ -235,8 +237,8 @@ def drawHist(text_info, data, config_name):
         kde=kde
     ).set(title=title, xlabel=x_text, ylabel=y_text)
 
-    plt.savefig("plots/" + config_name + "_" + title, dpi=400)
-
+    plt.savefig(path.join("plots", config_name, config_name + "_" + title),
+        bbox_inches='tight', dpi=400)
 
 def saveCsv(sca_df, vec_df, config_name):
     sca_df.to_csv(config_name + "_sca.csv")
