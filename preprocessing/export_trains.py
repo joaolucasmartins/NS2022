@@ -1,10 +1,7 @@
-import pandas as pd
-import numpy as np
-
-import os
 import os.path
 
 import export_trains_argparse
+import common
 
 args = export_trains_argparse.parse()
 
@@ -15,8 +12,6 @@ CONFIG_NAME = args.config
 
 DEST_FILE = CONFIG_NAME + '.ini'
 BONN_DEST_FILE = CONFIG_NAME + '.movements'
-
-SCALE_FACTOR = 1e5
 
 START_DAY = args.sDay
 START_T = args.sTime
@@ -33,54 +28,19 @@ FINAL_X = args.fx
 FINAL_Y = args.fy
 
 
+loader = common.GTFSLoader(SRC_DIR)
 
-stops_cols = {
-    'stop_name': str,
-    'stop_id': np.int64,
-    'stop_lat': np.float64,
-    'stop_lon': np.float64
-}
-stops = pd.read_csv(os.path.join(SRC_DIR, 'stops.txt'), dtype=stops_cols)
-
-
-data_cols = {
-    'trip_id': np.int64,
-    'arrival_time': np.int64,
-    'departure_time': np.int64,
-    'stop_id': np.int64,
-    'stop_sequence': np.int64,
-    'route_short_name': str,
-    'stop_lat': np.float64,
-    'stop_lon': np.float64
-}
-data = pd.read_csv(os.path.join(SRC_DIR, 'denormalized.csv'), dtype=data_cols)
-
-
-# Find position values to normalize
-min_lon = stops['stop_lon'].min() * SCALE_FACTOR
-max_lon = stops['stop_lon'].max() * SCALE_FACTOR
-min_lat = stops['stop_lat'].min() * SCALE_FACTOR
-max_lat = stops['stop_lat'].max() * SCALE_FACTOR
-
+stops = loader.import_stops()
+coord_normalizer = common.CoordNormalizer(stops)
 del stops
 
-def parseTime(s: str) -> int:
-    return int(s[0:2]) * 3600 + int(s[3:5]) * 60 + int(s[6:8])
+data = loader.import_denormalized()
 
-def normalize_lat(lat: float) -> float:
-    global min_lat
-    global max_lat
-    return -lat*SCALE_FACTOR + max_lat
-
-def normalize_lon(lon: float) -> float:
-    global min_lon
-    global max_lon
-    return lon*SCALE_FACTOR - min_lon
 
 days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-START_T = parseTime(START_T) + days.index(START_DAY) * 24 * 3600
-END_T = parseTime(END_T) + days.index(END_DAY) * 24 * 3600
+START_T = loader.parse_time(START_T) + days.index(START_DAY) * 24 * 3600
+END_T = loader.parse_time(END_T) + days.index(END_DAY) * 24 * 3600
 
 
 
@@ -93,8 +53,7 @@ trains =  []
 old_row = {'trip_id': None}
 bonnmotion, trip_start_t = None, None
 for _, row in data.iterrows():
-    lat = normalize_lat(row['stop_lat'])
-    lon = normalize_lon(row['stop_lon'])
+    lat, lon = coord_normalizer.normalize(row)
 
     if row['trip_id'] != old_row['trip_id']:
         # New trip
