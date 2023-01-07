@@ -1,83 +1,29 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 import networkx as nx
 
-import os
-import os.path
 SRC_DIR = 'muenchen'
 OUT_FILE = '../proj/simulations/sbahn/muenchen_sbahn.txt'
 
-SCALE_FACTOR = 1e5
+import common
+
+loader = common.GTFSLoader(SRC_DIR)
 
 # Import data
-routes_cols = {
-    'route_long_name': str,
-    'route_short_name': str,
-    'agency_id': np.int64,
-    'route_type': np.int64,
-    'route_id': np.int64
-}
-routes = pd.read_csv(os.path.join(SRC_DIR, 'routes.txt'), dtype=routes_cols)
+routes = loader.import_routes()
+trips = loader.import_trips()
+stops = loader.import_stops()
+stop_times = loader.import_stop_times()
+calendar = loader.import_calendar()
 
-trips_cols = {
-    'route_id': np.int64,
-    'service_id': np.int64,
-    'direction_id': np.int64,
-    'trip_id': np.int64
-}
-trips = pd.read_csv(os.path.join(SRC_DIR, 'trips.txt'), dtype=trips_cols)
-
-stops_cols = {
-    'stop_name': str,
-    'stop_id': np.int64,
-    'stop_lat': np.float64,
-    'stop_lon': np.float64
-}
-stops = pd.read_csv(os.path.join(SRC_DIR, 'stops.txt'), dtype=stops_cols)
-
-stop_times_cols = {
-    'trip_id': np.int64,
-    'arrival_time': str,
-    'departure_time': str,
-    'stop_id': np.int64,
-    'stop_sequence': np.int64,
-    'pickup_type': np.float64,
-    'drop_off_type': np.float64
-}
-stop_times = pd.read_csv(os.path.join(SRC_DIR, 'stop_times.txt'), dtype=stop_times_cols)
-
-calendar_cols = {
-    'monday': np.int64,
-    'tuesday': np.int64,
-    'wednesday': np.int64,
-    'thursday': np.int64,
-    'friday': np.int64,
-    'saturday': np.int64,
-    'sunday': np.int64,
-    'start_date': np.int64,
-    'end_date': np.int64,
-    'service_id': np.int64
-}
-calendar = pd.read_csv(os.path.join(SRC_DIR, 'calendar.txt'), dtype=calendar_cols)
-
-# Find position values to normalize
-min_lon = stops['stop_lon'].min() * SCALE_FACTOR
-max_lon = stops['stop_lon'].max() * SCALE_FACTOR
-min_lat = stops['stop_lat'].min() * SCALE_FACTOR
-max_lat = stops['stop_lat'].max() * SCALE_FACTOR
-
-print("Lon", min_lon, max_lon)
-print("Lat", min_lat, max_lat)
+coord_normalizer = common.CoordNormalizer(stops)
 
 G = nx.Graph()
 s = set()
 for _, row in stops.iterrows():
     G.add_node(row['stop_id'], 
         name=row['stop_name'],
-        pos=(row['stop_lon']*SCALE_FACTOR - min_lon,
-        -row['stop_lat']*SCALE_FACTOR + max_lat)
+        pos=(coord_normalizer.normalize_lon(row['stop_lon']), coord_normalizer.normalize_lat(row['stop_lat']))
     )
     s.add(row['stop_id'])
 
@@ -133,7 +79,7 @@ print('Nodes:', G.number_of_nodes())
 print('Edges:', G.number_of_edges())
 
 f = open(OUT_FILE, 'w')
-f.write(f'{(max_lat - min_lat):.0f} {(max_lon - min_lon):.0f}\n')
+f.write(f'{coord_normalizer.DIST_X:.0f} {coord_normalizer.DIST_Y:.0f}\n')
 f.write(f'{G.number_of_nodes()}\n')
 for n in G.nodes():
     degree = G.degree[n]

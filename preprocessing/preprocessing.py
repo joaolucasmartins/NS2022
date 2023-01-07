@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+
 # In[1]:
 import pandas as pd
 import numpy as np
@@ -12,74 +13,20 @@ import shutil
 SRC_DIR = 'original'
 DEST_DIR = 'muenchen'
 
+import common
 
+loader = common.GTFSLoader(SRC_DIR)
 # In[2]:
+routes = loader.import_routes()
+trips = loader.import_trips()
+agency = loader.import_agency()
+stops = loader.import_stops()
+stop_times = loader.import_stop_times()
+routes = loader.import_routes()
+calendar = loader.import_calendar()
 
 
-routes_cols = {
-    'route_long_name': str,
-    'route_short_name': str,
-    'agency_id': np.int64,
-    'route_type': np.int64,
-    'route_id': np.int64
-}
-routes = pd.read_csv(os.path.join(SRC_DIR, 'routes.txt'), dtype=routes_cols)
-
-
-# In[3]:
-
-
-trips_cols = {
-    'route_id': np.int64,
-    'service_id': np.int64,
-    'direction_id': np.int64,
-    'trip_id': np.int64
-}
-trips = pd.read_csv(os.path.join(SRC_DIR, 'trips.txt'), dtype=trips_cols)
-
-
-# In[4]:
-
-
-agency_cols = {
-    'agency_id': np.int64,
-    'agency_name': str,
-    'agency_url': str,
-    'agency_timezone': str,
-    'agency_lang': str
-}
-agency = pd.read_csv(os.path.join(SRC_DIR, 'agency.txt'), dtype=agency_cols)
-
-
-# In[5]:
-
-
-stops_cols = {
-    'stop_name': str,
-    'stop_id': np.int64,
-    'stop_lat': np.float64,
-    'stop_lon': np.float64
-}
-stops = pd.read_csv(os.path.join(SRC_DIR, 'stops.txt'), dtype=stops_cols)
-
-
-# In[6]:
-
-
-stop_times_cols = {
-    'trip_id': np.int64,
-    'arrival_time': str,
-    'departure_time': str,
-    'stop_id': np.int64,
-    'stop_sequence': np.int64,
-    'pickup_type': np.float64,
-    'drop_off_type': np.float64
-}
-stop_times = pd.read_csv(os.path.join(SRC_DIR, 'stop_times.txt'), dtype=stop_times_cols)
-
-
-# In[8]:
-
+# In[9]:
 
 routes_sbahn = routes.loc[
     (routes['agency_id'] == 73) &
@@ -88,25 +35,7 @@ routes_sbahn = routes.loc[
     ~(routes['route_long_name'].str.fullmatch('S5'))
 ]
 del routes
-
-
-# In[9]:
-
-
-calendar_cols = {
-    'monday': np.int64,
-    'tuesday': np.int64,
-    'wednesday': np.int64,
-    'thursday': np.int64,
-    'friday': np.int64,
-    'saturday': np.int64,
-    'sunday': np.int64,
-    'start_date': np.int64,
-    'end_date': np.int64,
-    'service_id': np.int64
-}
-calendar = pd.read_csv(os.path.join(SRC_DIR, 'calendar.txt'), dtype=calendar_cols)
-
+routes_sbahn
 
 # In[10]:
 

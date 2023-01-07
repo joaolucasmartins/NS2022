@@ -44,7 +44,7 @@ network MuenchenNetwork
     parameters:
         int nClients;
         int nTrains;
-        @display("bgb=93253,52926;bgi=maps/muenchen,s;");
+        @display("bgi=maps/muenchen,s;");
     
     types:
         channel C extends Eth100M {}
@@ -52,24 +52,31 @@ network MuenchenNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=20000,20000");
+                @display("p=500,500;is=s;");
         }
+        sbahnNetworkGenerator: SbahnNetworkGenerator {
+            @display("p=500,1000;is=s;i=block/wheelbarrow");
+        	filename = "sbahn/muenchen_sbahn.txt";
+        	disable = false;
+        };
+
         client[nClients]: TumClient {
             parameters:
-                @display("i=device/laptop;p=250,100,col,100;");
+                @display("is=vs;i=device/pocketpc;p=6000,1000,m,10,250,250;");
         }
         train[nTrains]: TumTrain;
+
         server: TumServer {
         	parameters:
-        	    @display("p=400,250;i=device/pc2");
+        	    @display("p=3000,2000;i=device/server");
         }
         clientRouter: Router {
         	parameters:
-        	    @display("p=375,150");
+        	    @display("p=3500,3000;i=device/smallrouter");
         }
         trainRouter: Router {
         	parameters:
-        	    @display("p=425,150");
+        	    @display("p=2500,3000;i=device/smallrouter");
         }
         carrierAggregation: CarrierAggregation {
             @display("p=16000,16000;is=s");
@@ -84,18 +91,12 @@ network MuenchenNetwork
             @display("p=15000,15000");
         }
         gnb: gNodeB {
-            parameters: 
+            parameters:
                 @display("p=20000,20000;is=vl");
         }
         train5G[1]: TumTrain5G {
             parameters:
                 @display("i=device/laptop;p=21000,21000");
-        }
-        
-        sbahnNetworkGenerator: SbahnNetworkGenerator {
-            @display("p=100,200");
-        	filename = "sbahn/muenchen_sbahn.txt";
-        	disable = false;
         }
         channelControl: LteChannelControl {
             @display("p=15000,15000;is=s");
