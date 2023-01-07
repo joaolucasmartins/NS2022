@@ -135,8 +135,6 @@ void TumTrainApp5G::sendPacket()
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
     EV_INFO << "sending train update for track id " << trackId << " and train id " << trainId << "\n";
-    std::cout << "destAddr: " << destAddr << std::endl;
-    std::cout << "destPort: " << destPort << std::endl;
     socket.sendTo(packet, destAddr, destPort);
     numSent++;
 }
