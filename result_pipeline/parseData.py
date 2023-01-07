@@ -204,12 +204,10 @@ def plotLine(text_info, N, data, unit, config_name):
 
     for data_x, data_y in zip(x, y):
         n_x, n_y = binData(data_x, data_y, N)
-        formatterx = EngFormatter(unit="s")
         if (unit == "%"):
             formattery = PercentFormatter()
         else:
             formattery = EngFormatter(unit=unit)
-        ax.xaxis.set_major_formatter(formatterx)
         ax.yaxis.set_major_formatter(formattery)
         sns.lineplot(x=n_x, y=n_y, ax=ax)
 
