@@ -22,19 +22,10 @@ Define_Module(SbahnNetworkGenerator);
 
 void SbahnNetworkGenerator::initialize()
 {
-    if (!par("disable") && hasGUI()) {
-        parseFile();
-    }
+    parseFile(!par("disable") && hasGUI());
 }
 
-void SbahnNetworkGenerator::parseFile() {
-    fGroup = new cGroupFigure("networkMap");
-    getParentModule()->getCanvas()->addFigure(fGroup);
-    fGroup->lowerToBottom();
-
-    cGroupFigure *connGroup = new cGroupFigure("connections");
-    fGroup->addFigure(connGroup);
-
+void SbahnNetworkGenerator::parseFile(bool addFigs) {
     std::string filename = par("filename");
     std::ifstream in(filename, std::ios::in);
     if (in.fail())
@@ -42,6 +33,20 @@ void SbahnNetworkGenerator::parseFile() {
 
     int maxLat, maxLon, nNodes, nEdges;
     in >> maxLat >> maxLon >> nNodes;
+
+    cDisplayString &dp = getParentModule()->getDisplayString();
+    dp.setTagArg("bgb", 0, maxLat);
+    dp.setTagArg("bgb", 1, maxLon);
+
+    if (!addFigs)
+        return;
+
+    fGroup = new cGroupFigure("networkMap");
+    getParentModule()->getCanvas()->addFigure(fGroup);
+    fGroup->lowerToBottom();
+
+    cGroupFigure *connGroup = new cGroupFigure("connections");
+    fGroup->addFigure(connGroup);
 
     for (int i=0; i<nNodes; ++i) {
         int id, degree, lat, lon;

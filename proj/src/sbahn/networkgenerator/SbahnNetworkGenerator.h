@@ -33,7 +33,7 @@ private:
     std::map<int, double> stopsY;
     cGroupFigure *fGroup;
 
-    void parseFile();
+    void parseFile(bool addFigs);
     void addStop(int id, int degree, int lat, int lon, const std::string &name);
     void addConnection(int a, int b, int routes);
   protected:
