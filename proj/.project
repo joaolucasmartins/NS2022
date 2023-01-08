@@ -5,6 +5,7 @@
 	<projects>
 		<project>inet</project>
 		<project>inet4.4</project>
+		<project>Simu5G-1.2.1</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

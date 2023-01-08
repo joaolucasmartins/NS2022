@@ -35,9 +35,8 @@ import simu5g.common.binder.Binder;
 import simu5g.common.carrierAggregation.CarrierAggregation;
 import simu5g.nodes.Upf;
 import simu5g.nodes.NR.gNodeB;
-//import simu5g.nodes.NR.NRUe;
-//import simu5g.nodes.backgroundCell.BackgroundCell;
 import simu5g.world.radio.LteChannelControl;
+import inet.networklayer.ipv4.RoutingTableRecorder;
 
 network MuenchenNetwork
 {
@@ -62,58 +61,62 @@ network MuenchenNetwork
 
         client[nClients]: TumClient {
             parameters:
-                @display("is=vs;i=device/pocketpc;p=6000,1000,m,10,250,250;");
+                @display("is=vs;i=device/pocketpc;p=600,1000,m,10,250,250;");
         }
-        train[nTrains]: TumTrain;
+        train[nTrains]: TumTrain5G;
 
         server: TumServer {
         	parameters:
-        	    @display("p=3000,2000;i=device/server");
+        	    @display("p=300,200;i=device/server");
         }
         clientRouter: Router {
         	parameters:
-        	    @display("p=3500,3000;i=device/smallrouter");
+        	    @display("p=350,300;i=device/smallrouter");
         }
         trainRouter: Router {
         	parameters:
-        	    @display("p=2500,3000;i=device/smallrouter");
+        	    @display("p=250,300;i=device/smallrouter");
+        }
+        
+        channelControl: LteChannelControl {
+            @display("p=500,1500;is=s;");
         }
         carrierAggregation: CarrierAggregation {
-            @display("p=16000,16000;is=s");
+            @display("p=500,2000;is=s;");
         }
         binder: Binder {
-            @display("p=50,175;is=s");
+            @display("p=500,2500;is=s;");
         }
+        routingRecorder: RoutingTableRecorder {
+            @display("p=500,3000;is=s");
+        }
+
         upf: Upf {
-            @display("p=20000,15000");
+            @display("p=2000,1500");
         }
         iUpf: Upf {
-            @display("p=15000,15000");
+            @display("p=1500,1500");
         }
-        gnb: gNodeB {
+        gnb1: gNodeB {
             parameters:
-                @display("p=20000,20000;is=vl");
+                @display("is=l;r=5000");
         }
-        train5G[1]: TumTrain5G {
+        gnb2: gNodeB {
             parameters:
-                @display("i=device/laptop;p=21000,21000");
+                @display("is=l;r=5000");
         }
-        channelControl: LteChannelControl {
-            @display("p=15000,15000;is=s");
-        }
+
 
     connections:
         for i=0..nClients-1 {
             client[i].ethg++ <--> C <--> clientRouter.ethg++;
         }
-//        for i=0..nTrains-1 {
-//            train[i].ethg++ <--> TC <--> trainRouter.ethg++;
-//        }
         trainRouter.pppg++ <--> Eth10G <--> upf.filterGate;
 
         clientRouter.ethg++ <--> C <--> server.ethg++;
         trainRouter.ethg++ <--> C <--> server.ethg++;
         
         upf.pppg++ <--> Eth10G <--> iUpf.pppg++;
-        iUpf.pppg++ <--> Eth10G <--> gnb.ppp;
+        iUpf.pppg++ <--> Eth10G <--> gnb1.ppp;
+        iUpf.pppg++ <--> Eth10G <--> gnb2.ppp;        
 }

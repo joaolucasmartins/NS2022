@@ -76,14 +76,14 @@ void SbahnNetworkGenerator::addStop(int id, int degree, int lat, int lon, const 
 
     auto *icon = new cIconFigure((std::to_string(id)+ "_icon").c_str());
     icon->setImageName("sbahn");
-//    icon->setSize(512, 512);
+    icon->setSize(16, 16);
     icon->setPosition(p);
     fGroup->addFigure(icon);
 
     stopsX[id] = p.x;
     stopsY[id] = p.y;
 
-    p.y += 200;
+    p.y += 18; // TODO: Calculate offset from maxsize
 
     cLabelFigure *label = new cLabelFigure((std::to_string(id) + "_label").c_str());
     label->setText(name.c_str());

@@ -77,6 +77,9 @@ if trip_start_t != None:
     # save previous route, start time, finish time
     trains.append((trip_start_t, old_row['departure_time'] - START_T, old_row['route_short_name'], bonnmotion))
 
+# Remove trains with start time equal to end time
+trains = [t for t in trains if t[0] != t[1]]
+
 # Sort by start time
 trains.sort(key=lambda row: row[0])
 
