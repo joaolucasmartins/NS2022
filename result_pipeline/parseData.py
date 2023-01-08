@@ -144,21 +144,21 @@ def generatePlots(sca_df, vec_df, config_name):
     filterByServer = lambda x: x["module"].str.contains("server")
 
     linePlots = [
-        (("appLayerOutputThroughput_fromClients", "Simulation Time", "Client Application Layer Throughput"),
+        (("appLayerOutputThroughput_fromClients", "Simulation Time (s)", "Client Application Layer Throughput"),
             100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))][:1], "Bytes/s"),
-        (("appLayerOutputThroughput_toServers", "Simulation Time", "Server Application Layer Throughput"),
+        (("appLayerOutputThroughput_toServers", "Simulation Time (s)", "Server Application Layer Throughput"),
             100, vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))], "Bytes/s"),
-        (("linkLayerOutputThroughput_fromClients", "Simulation Time", "Client Link Layer Throughput"),
+        (("linkLayerOutputThroughput_fromClients", "Simulation Time (s)", "Client Link Layer Throughput"),
             0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))][:1], "Bytes/s"),
-        (("linkLayerOutputThroughput_toServers", "Simulation Time", "Server Link Layer Throughput"),
+        (("linkLayerOutputThroughput_toServers", "Simulation Time (s)", "Server Link Layer Throughput"),
             0, vec_df[(linkLayerThroughput(vec_df)) & (filterByServer(vec_df))], "Bytes/s"),
-        (("appLayerUtilization_toServers", "Simulation Time", "Client-Server Channel Utilization"),
+        (("appLayerUtilization_toServers", "Simulation Time (s)", "Client-Server Channel Utilization"),
             100, vec_df[(appLayerUtilization(vec_df)) & (filterByServer(vec_df))], "%"),
-        (("sentTrainUpdates_Server", "Simulation Time", "Number of Sent Train Updates by Server"),
+        (("sentTrainUpdates_Server", "Simulation Time (s)", "Number of Sent Train Updates by Server"),
             0, vec_df[serverSentTrainUpdates(vec_df)], ""),
-        (("droppedTrainUpdates_Server", "Simulation Time", "Number of Dropped Train Updates by Server"),
+        (("droppedTrainUpdates_Server", "Simulation Time (s)", "Number of Dropped Train Updates by Server"),
             0, vec_df[serverDroppedTrainUpdates(vec_df)], ""),
-        (("receivedTrainUpdates_Server", "Simulation Time", "Number of Received Train Updates by Server"),
+        (("receivedTrainUpdates_Server", "Simulation Time (s)", "Number of Received Train Updates by Server"),
             0, vec_df[serverReceivedTrainUpdates(vec_df)], "")
     ]
 
