@@ -47,8 +47,10 @@ days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 START_T = loader.parse_time(START_T) + days.index(START_DAY) * 24 * 3600
 END_T = loader.parse_time(END_T) + days.index(END_DAY) * 24 * 3600
 
+BUFFER_T = 10 * 60
+
 # Filter out unwanted entries
-data.drop(data.loc[(data['departure_time'] < START_T) | (data['arrival_time'] > END_T), :].index, inplace=True)
+data.drop(data.loc[(data['departure_time'] < START_T) | (data['arrival_time'] > END_T + BUFFER_T), :].index, inplace=True)
 data.drop(data.loc[~(data['route_short_name'].isin(ROUTES)), :].index, inplace=True)
 
 
