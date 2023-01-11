@@ -128,6 +128,7 @@ def addStatistics(df, colname):
 
 def generatePlots(sca_df, vec_df, config_name):
     try:
+        mkdir("plots")
         mkdir(path.join("plots", config_name))
     except OSError as _:
         pass
