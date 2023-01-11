@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for tum
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out -KINET4_4_PROJ=../../inet4.4 -KSIMU5G_1_2_1_PROJ=../../Simu5G-1.2.1 -DINET_IMPORT -I. -I$$\(INET4_4_PROJ\)/src -I$$\(SIMU5G_1_2_1_PROJ\)/src -L$$\(INET4_4_PROJ\)/src -L$$\(SIMU5G_1_2_1_PROJ\)/src -lINET$$\(D\) -lsimu5g$$\(D\)
+#  opp_makemake -f --deep -O out -KSIMU5G_PROJ=/home/jm/Documents/Work/NetworkSimulation/Projects/simu5g -KINET4_4_PROJ=/home/jm/Documents/Work/NetworkSimulation/Projects/inet4.4 -I. -I$$\(SIMU5G_PROJ\)/src -I$$\(INET4_4_PROJ\)/src -L$$\(SIMU5G_PROJ\)/src -lsimu5g$$\(D\)
 #
 
 # Name of target to be created (-o option)
@@ -19,13 +19,13 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(QTENV_LIBS) $(CMDENV_LIBS)
 #USERIF_LIBS = $(QTENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -I. -I$(INET4_4_PROJ)/src -I$(SIMU5G_1_2_1_PROJ)/src
+INCLUDE_PATH = -I. -I$(SIMU5G_PROJ)/src -I$(INET4_4_PROJ)/src
 
 # Additional object and library files to link with
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = $(LDFLAG_LIBPATH)$(INET4_4_PROJ)/src $(LDFLAG_LIBPATH)$(SIMU5G_1_2_1_PROJ)/src  -lINET$(D) -lsimu5g$(D)
+LIBS = $(LDFLAG_LIBPATH)$(SIMU5G_PROJ)/src  -lsimu5g$(D)
 
 # Output directory
 PROJECT_OUTPUT_DIR = out
@@ -52,8 +52,8 @@ MSGFILES =
 SMFILES =
 
 # Other makefile variables (-K)
-INET4_4_PROJ=../../inet4.4
-SIMU5G_1_2_1_PROJ=../../Simu5G-1.2.1
+SIMU5G_PROJ=/home/jm/Documents/Work/NetworkSimulation/Projects/simu5g
+INET4_4_PROJ=/home/jm/Documents/Work/NetworkSimulation/Projects/inet4.4
 
 #------------------------------------------------------------------------------
 
@@ -74,10 +74,10 @@ include $(CONFIGFILE)
 # Simulation kernel and user interface libraries
 OMNETPP_LIBS = $(OPPMAIN_LIB) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 ifneq ($(PLATFORM),win32)
-LIBS += -Wl,-rpath,$(abspath $(INET4_4_PROJ)/src) -Wl,-rpath,$(abspath $(SIMU5G_1_2_1_PROJ)/src)
+LIBS += -Wl,-rpath,$(abspath $(SIMU5G_PROJ)/src)
 endif
 
-COPTS = $(CFLAGS) $(IMPORT_DEFINES) -DINET_IMPORT $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
+COPTS = $(CFLAGS) $(IMPORT_DEFINES)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 MSGCOPTS = $(INCLUDE_PATH)
 SMCOPTS =
 

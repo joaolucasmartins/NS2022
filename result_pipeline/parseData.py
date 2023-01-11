@@ -55,7 +55,14 @@ def filterMetrics(sca_df, vec_df):
     serverSentTrainUpdates = lambda x: (x["name"] == "serverSentTrainUpdates")
     serverDroppedTrainUpdates = lambda x: (x["name"] == "serverDroppedTrainUpdates")
     serverReceivedTrainUpdates = lambda x: (x["name"] == "serverReceivedTrainUpdates")
-    vec_metrics = (linkLayerThroughput, appLayerThroughput, clientResponseDelay, serverSentTrainUpdates, serverDroppedTrainUpdates, serverReceivedTrainUpdates)
+    harqErrorRate = lambda x: (x["name"] == "harqErrorRateUl:vector")
+    rlcDelay = lambda x: (x["name"] == "rlcDelayUl:vector")
+    rlcPacketLoss = lambda x: (x["name"] == "rlcPacketLossTotal:vector")
+    distance = lambda x: (x["name"] == "distance:vector")
+    vec_metrics = (linkLayerThroughput, appLayerThroughput, clientResponseDelay,
+        serverSentTrainUpdates, serverDroppedTrainUpdates, serverReceivedTrainUpdates,
+        rlcDelay, rlcPacketLoss, distance, harqErrorRate
+    )
 
     # Histograms - parse sca dataset
     clientEndToEndDelay = lambda x: (x["name"] == "endToEndDelay:histogram")  & (x["module"].str.contains("client")) & (x["type"] == "histogram")
@@ -164,7 +171,15 @@ def generatePlots(sca_df, vec_df, config_name):
         (("droppedTrainUpdates_Server", "Simulation Time (s)", "Number of Dropped Train Updates by Server"),
             0, vec_df[serverDroppedTrainUpdates(vec_df)], ""),
         (("receivedTrainUpdates_Server", "Simulation Time (s)", "Number of Received Train Updates by Server"),
-            0, vec_df[serverReceivedTrainUpdates(vec_df)], "")
+            0, vec_df[serverReceivedTrainUpdates(vec_df)], ""),
+        (("trainDistance", "Simulation Time (s)", "Distance between train 0 and its tower"),
+            0, vec_df[distance(vec_df) & filterByTrains(vec_df)], "m"),
+        (("harqErrorRate", "Simulation Time (s)", "Harq error rate of train 0"),
+            0, vec_df[harqErrorRate(vec_df) & filterByTrains(vec_df)], ""),
+        (("rlcDelay", "Simulation Time (s)", "RLC delay of train 0"),
+            0, vec_df[rlcDelay(vec_df) & filterByTrains(vec_df)], "s"),
+        (("rlcPacketLoss", "Simulation Time (s)", "RLC Packet loss of train 0"),
+            0, vec_df[rlcPacketLoss(vec_df) & filterByTrains(vec_df)], "")
     ]
 
     histPlots = [
@@ -180,7 +195,7 @@ def generatePlots(sca_df, vec_df, config_name):
         drawHist(text, data, config_name)
 
 
-def plotLine(text_info, N, data, unit, config_name):
+def plotLine(text_info, N, data, unit, config_name, legend_from_modules=True, legend=None):
     from matplotlib.ticker import EngFormatter, PercentFormatter
 
     def binData(x, y, N):
@@ -211,12 +226,16 @@ def plotLine(text_info, N, data, unit, config_name):
         n_x, n_y = binData(data_x, data_y, N)
         if (unit == "%"):
             formattery = PercentFormatter()
-        else:
+            ax.yaxis.set_major_formatter(formattery)
+        elif (unit != ""):
             formattery = EngFormatter(unit=unit)
-        ax.yaxis.set_major_formatter(formattery)
+            ax.yaxis.set_major_formatter(formattery)
         sns.lineplot(x=n_x, y=n_y, ax=ax)
 
-    ax.legend(labels=data[["module"]].to_numpy())
+    if (legend_from_modules):
+        legend = data[["module"]].to_numpy()
+    if (legend is not None):
+        ax.legend(labels=legend)
     ax.set_xlabel(x_text)
     ax.set_ylabel(y_text)
     
