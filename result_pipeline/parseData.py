@@ -1,7 +1,7 @@
 #!/bin/python
 
 from sys import argv
-from os import mkdir
+from os import mkdir, path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -120,7 +120,7 @@ def addStatistics(df, colname):
 
 def generatePlots(sca_df, vec_df, config_name):
     try:
-        mkdir("plots")
+        mkdir(path.join("plots", config_name))
     except OSError as _:
         pass
     # Set filters
@@ -149,29 +149,38 @@ def generatePlots(sca_df, vec_df, config_name):
     filterByServer = lambda x: x["module"].str.contains("server")
 
     linePlots = [
-        ("appLayerOutputThroughput_fromClients", 100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))][:1], "Bytes"),
-        ("appLayerOutputThroughput_toServers", 100, vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))], "Bytes"),
-        ("linkLayerOutputThroughput_fromClients", 0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))][:1], "Bytes"),
-        ("linkLayerOutputThroughput_toServers", 0, vec_df[(linkLayerThroughput(vec_df)) & (filterByServer(vec_df))], "Bytes"),
-        ("appLayerUtilization_toServers", 100, vec_df[(appLayerUtilization(vec_df)) & (filterByServer(vec_df))], "%"),
-        ("sentTrainUpdates_Server", 0, vec_df[serverSentTrainUpdates(vec_df)], "Nº Updates"),
-        ("droppedTrainUpdates_Server", 0, vec_df[serverDroppedTrainUpdates(vec_df)], "Nº Updates"),
-        ("receivedTrainUpdates_Server", 0, vec_df[serverReceivedTrainUpdates(vec_df)], "Nº Updates")
+        (("appLayerOutputThroughput_fromClients", "Simulation Time (s)", "Client Application Layer Throughput"),
+            100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))][:1], "Bytes/s"),
+        (("appLayerOutputThroughput_toServers", "Simulation Time (s)", "Server Application Layer Throughput"),
+            100, vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))], "Bytes/s"),
+        (("linkLayerOutputThroughput_fromClients", "Simulation Time (s)", "Client Link Layer Throughput"),
+            0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))][:1], "Bytes/s"),
+        (("linkLayerOutputThroughput_toServers", "Simulation Time (s)", "Server Link Layer Throughput"),
+            0, vec_df[(linkLayerThroughput(vec_df)) & (filterByServer(vec_df))], "Bytes/s"),
+        (("appLayerUtilization_toServers", "Simulation Time (s)", "Client-Server Channel Utilization"),
+            100, vec_df[(appLayerUtilization(vec_df)) & (filterByServer(vec_df))], "%"),
+        (("sentTrainUpdates_Server", "Simulation Time (s)", "Number of Sent Train Updates by Server"),
+            0, vec_df[serverSentTrainUpdates(vec_df)], ""),
+        (("droppedTrainUpdates_Server", "Simulation Time (s)", "Number of Dropped Train Updates by Server"),
+            0, vec_df[serverDroppedTrainUpdates(vec_df)], ""),
+        (("receivedTrainUpdates_Server", "Simulation Time (s)", "Number of Received Train Updates by Server"),
+            0, vec_df[serverReceivedTrainUpdates(vec_df)], "")
     ]
 
     histPlots = [
-        ("clientResponseDelay", vec_df[clientResponseDelay(vec_df)]),
+        (("clientResponseDelay", "Simulation Time", "Client-Sever Response Delay"),
+            vec_df[clientResponseDelay(vec_df)]),
         #("clientEndToEndDelay", sca_df[clientEndToEndDelay(sca_df)])
     ]
 
-    for title, NBins, data, unit in linePlots:
-        plotLine(data, NBins, title, unit, config_name)
+    for text, NBins, data, unit in linePlots:
+        plotLine(text, NBins, data, unit, config_name)
     
-    for title, data in histPlots:
-        drawHist(data, title, config_name)
+    for text, data in histPlots:
+        drawHist(text, data, config_name)
 
 
-def plotLine(data, N, title, unit, config_name):
+def plotLine(text_info, N, data, unit, config_name):
     from matplotlib.ticker import EngFormatter, PercentFormatter
 
     def binData(x, y, N):
@@ -194,25 +203,28 @@ def plotLine(data, N, title, unit, config_name):
         x = [i.vectime for _, i in data.iterrows()]
         y = [i.vecvalue for _, i in data.iterrows()]
 
+    title, x_text, y_text = text_info
+
     fig, ax = plt.subplots()
-    ax.set_title(title)
 
     for data_x, data_y in zip(x, y):
         n_x, n_y = binData(data_x, data_y, N)
-        formatterx = EngFormatter(unit="s")
         if (unit == "%"):
             formattery = PercentFormatter()
         else:
             formattery = EngFormatter(unit=unit)
-        ax.xaxis.set_major_formatter(formatterx)
         ax.yaxis.set_major_formatter(formattery)
         sns.lineplot(x=n_x, y=n_y, ax=ax)
 
     ax.legend(labels=data[["module"]].to_numpy())
-    plt.savefig("plots/" + config_name + "_" + title, dpi=400)
+    ax.set_xlabel(x_text)
+    ax.set_ylabel(y_text)
+    
+    plt.savefig(path.join("plots", config_name, config_name + "_" + title),
+        bbox_inches='tight', dpi=400)
 
 
-def drawHist(data, title, config_name):
+def drawHist(text_info, data, config_name):
     # Get merged data into np array
     values = np.concatenate(data.vecvalue.to_numpy())
     if np.unique(values).size > 1:
@@ -220,15 +232,16 @@ def drawHist(data, title, config_name):
     else:
         kde = False
     
+    title, x_text, y_text = text_info
     df = pd.DataFrame(values).melt(var_name='column', value_name='data')
     sns.displot(data=df,
         x="data",
         col="column",
         kde=kde
-    ).set(title=title)
+    ).set(title=title, xlabel=x_text, ylabel=y_text)
 
-    plt.savefig("plots/" + config_name + "_" + title, dpi=400)
-
+    plt.savefig(path.join("plots", config_name, config_name + "_" + title),
+        bbox_inches='tight', dpi=400)
 
 def saveCsv(sca_df, vec_df, config_name):
     sca_df.to_csv(config_name + "_sca.csv")
