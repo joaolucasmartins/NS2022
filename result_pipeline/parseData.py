@@ -133,6 +133,11 @@ def generatePlots(sca_df, vec_df, config_name):
     serverSentTrainUpdates = lambda x: (x["name"] == "serverSentTrainUpdates")
     serverDroppedTrainUpdates = lambda x: (x["name"] == "serverDroppedTrainUpdates")
     serverReceivedTrainUpdates = lambda x: (x["name"] == "serverReceivedTrainUpdates")
+    harqErrorRate = lambda x: (x["name"] == "harqErrorRateUl:vector")
+    rlcDelay = lambda x: (x["name"] == "rlcDelayUl:vector")
+    rlcPacketLoss = lambda x: (x["name"] == "rlcPacketLossTotal:vector")
+    distance = lambda x: (x["name"] == "distance:vector")
+
     #clientEndToEndDelay = lambda x: (x["name"] == "endToEndDelay:histogram")  & (x["module"].str.contains("client")) & (("type" not in x) or (x["type"] == "histogram"))
     filterByIncomingTraffic = lambda x: x["name"].str.contains("incoming")
     filterByOutgoingTraffic = lambda x: x["name"].str.contains("outgoing")
