@@ -58,25 +58,6 @@ network MuenchenNetwork
         	filename = "sbahn/muenchen_sbahn.txt";
         	disable = false;
         };
-
-        client[nClients]: TumClient {
-            parameters:
-                @display("is=vs;i=device/pocketpc;p=600,1000,m,10,250,250;");
-        }
-        train[nTrains]: TumTrain5G;
-
-        server: TumServer {
-        	parameters:
-        	    @display("p=300,200;i=device/server");
-        }
-        clientRouter: Router {
-        	parameters:
-        	    @display("p=350,300;i=device/smallrouter");
-        }
-        trainRouter: Router {
-        	parameters:
-        	    @display("p=250,300;i=device/smallrouter");
-        }
         
         channelControl: LteChannelControl {
             @display("p=500,1500;is=s;");
@@ -101,13 +82,31 @@ network MuenchenNetwork
             parameters:
                 @display("is=l;r=5000");
         }
-        gnb2: gNodeB {
+//        gnb2: gNodeB {
+//            parameters:
+//                @display("is=l;r=5000");
+//        }
+
+        client[nClients]: TumClient {
             parameters:
-                @display("is=l;r=5000");
+                @display("is=vs;i=device/pocketpc;p=600,1000,m,10,250,250;");
         }
+        train[nTrains]: TumTrain5G;
 
-
+        server: TumServer {
+        	parameters:
+        	    @display("p=300,200;i=device/server");
+        }
+        clientRouter: Router {
+        	parameters:
+        	    @display("p=350,300;i=device/smallrouter");
+        }
+        trainRouter: Router {
+        	parameters:
+        	    @display("p=250,300;i=device/smallrouter");
+        }
     connections:
+        //# Data Network connections
         for i=0..nClients-1 {
             client[i].ethg++ <--> C <--> clientRouter.ethg++;
         }
@@ -115,8 +114,12 @@ network MuenchenNetwork
 
         clientRouter.ethg++ <--> C <--> server.ethg++;
         trainRouter.ethg++ <--> C <--> server.ethg++;
-        
+
+	    //# 5G Core Network connections
         upf.pppg++ <--> Eth10G <--> iUpf.pppg++;
         iUpf.pppg++ <--> Eth10G <--> gnb1.ppp;
-        iUpf.pppg++ <--> Eth10G <--> gnb2.ppp;        
+//        iUpf.pppg++ <--> Eth10G <--> gnb2.ppp;
+
+		//# X2 connections
+//        gnb1.x2++ <--> Eth10G <--> gnb2.x2++;
 }
