@@ -51,25 +51,25 @@ network MuenchenNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=500,500;is=s;");
+                @display("p=100,100;is=s;");
         }
         sbahnNetworkGenerator: SbahnNetworkGenerator {
-            @display("p=500,1000;is=s;i=block/wheelbarrow");
+            @display("p=100,200;is=s;i=block/wheelbarrow");
         	filename = "sbahn/muenchen_sbahn.txt";
         	disable = false;
         };
         
         channelControl: LteChannelControl {
-            @display("p=500,1500;is=s;");
+            @display("p=100,300;is=s;");
         }
         carrierAggregation: CarrierAggregation {
-            @display("p=500,2000;is=s;");
+            @display("p=100,400;is=s;");
         }
         binder: Binder {
-            @display("p=500,2500;is=s;");
+            @display("p=100,500;is=s;");
         }
         routingRecorder: RoutingTableRecorder {
-            @display("p=500,3000;is=s");
+            @display("p=100,600;is=s");
         }
 
         upf: Upf {
@@ -89,21 +89,21 @@ network MuenchenNetwork
 
         client[nClients]: TumClient {
             parameters:
-                @display("is=vs;i=device/pocketpc;p=600,1000,m,10,250,250;");
+                @display("is=vs;i=device/pocketpc;p=800,100,m,6,100,100;");
         }
         train[nTrains]: TumTrain5G;
 
         server: TumServer {
         	parameters:
-        	    @display("p=300,200;i=device/server");
+        	    @display("p=500,200;i=device/server");
         }
         clientRouter: Router {
         	parameters:
-        	    @display("p=350,300;i=device/smallrouter");
+        	    @display("p=550,300;i=device/smallrouter");
         }
         trainRouter: Router {
         	parameters:
-        	    @display("p=250,300;i=device/smallrouter");
+        	    @display("p=450,300;i=device/smallrouter");
         }
     connections:
         //# Data Network connections

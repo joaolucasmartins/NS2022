@@ -72,13 +72,13 @@ proj/simulations/mobility:
 mobility_configs: proj/simulations/mobility/offPeak.ini proj/simulations/mobility/rushHour.ini proj/simulations/mobility/weekend.ini
 
 proj/simulations/mobility/offPeak.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv preprocessing/export_trains.py venv
-	. venv/bin/activate && cd preprocessing && python export_trains.py offPeak mon 14:00:00 mon 16:00:00
+	. venv/bin/activate && cd preprocessing && python export_trains.py offPeak mon 15:00:00 mon 15:05:00 -r S2 -r S8
 
 proj/simulations/mobility/rushHour.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv preprocessing/export_trains.py venv
-	. venv/bin/activate && cd preprocessing && python export_trains.py rushHour mon 06:00:00 mon 08:00:00
+	. venv/bin/activate && cd preprocessing && python export_trains.py rushHour mon 06:30:00 mon 06:35:00 -r S2 -r S8
 
 proj/simulations/mobility/weekend.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv preprocessing/export_trains.py venv
-	. venv/bin/activate && cd preprocessing && python export_trains.py weekend sat 10:00:00 sat 12:00:00
+	. venv/bin/activate && cd preprocessing && python export_trains.py weekend sat 10:00:00 sat 10:05:00 -r S2 -r S8
 
 
 # ---------- Python Virtual Env ----------
