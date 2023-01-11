@@ -48,9 +48,9 @@ proj/simulations/Scalability: proj/tum mobility_configs
 # ---------- RESULT COLLECTINO & PLOTTING ----------
 .PHONY: plots
 plots:
-	. venv/bin/activate && cd result_pipeline && python parseData.py ../proj/simulations/results/ Default-#0
-	. venv/bin/activate && cd result_pipeline && python parseData.py ../proj/simulations/results/ NonFrequentUpdates-#0
-	. venv/bin/activate && cd result_pipeline && python parseData.py ../proj/simulations/results/ Scalability-#0
+	. venv/bin/activate && cd result_pipeline && python parseData.py ../proj/simulations/results/ Default 0
+	. venv/bin/activate && cd result_pipeline && python parseData.py ../proj/simulations/results/ NonFrequentUpdates 0
+	. venv/bin/activate && cd result_pipeline && python parseData.py ../proj/simulations/results/ Scalability 0
 
 
 

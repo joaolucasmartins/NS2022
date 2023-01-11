@@ -20,7 +20,7 @@ import inet.applications.contract.IApp;
 simple TumClientServerApp like IApp
 {
     parameters:
-        double trainDropTimeLimit @unit(s) = default(60s);  // Updates older than this parameter will be ignored and dropped
+        double trainDropTimeLimit @unit(s) = default(6s);  // Updates older than this parameter will be ignored and dropped
         
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on

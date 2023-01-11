@@ -7,9 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def convertToCsv(config_path, config_name):
+def convertToCsv(config_path, config_name, config_run):
     import subprocess
-    cmd = "opp_scavetool x " + config_path + config_name + ".{0} -o {1}_{0}.csv"
+    p = path.join(config_path, config_name, "-" + config_run)
+    cmd = "opp_scavetool x " + p + ".{0} -o {1}_{0}.csv"
     export_types = ("sca", "vec")
     ps = []
     for t in export_types:
@@ -267,12 +268,12 @@ def saveCsv(sca_df, vec_df, config_name):
     vec_df.to_csv(config_name + "_vec.csv")
 
 def usage():
-    print("usage: parseData config_path config_name")
+    print("usage: parseData config_path config_name config_run")
 
 if (__name__ == "__main__"):
-    if (len(argv) != 3):
+    if (len(argv) != 4):
         usage()
-    convertToCsv(argv[1], argv[2])
+    convertToCsv(argv[1], argv[2], argv[3])
     sca_df, vec_df = openDatasets(argv[2])
     sca_df, vec_df = filterNans(sca_df, vec_df)
     sca_df, vec_df = convertValsToList(sca_df, vec_df)
