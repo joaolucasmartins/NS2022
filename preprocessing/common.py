@@ -106,8 +106,8 @@ class GTFSLoader:
 class CoordNormalizer:
 
     # Hardcoded values, distances in meters
-    DIST_X = 69.42e3 / 10
-    DIST_Y = 58.85e3 / 10
+    DIST_X = 69.42e3 / 16
+    DIST_Y = 58.85e3 / 16
 
     def __init__(self, stops: pd.DataFrame) -> None:
         self.__config_locations(stops)

@@ -73,37 +73,37 @@ network MuenchenNetwork
         }
 
         upf: Upf {
-            @display("p=2000,1500");
+            @display("p=200,150");
         }
         iUpf: Upf {
-            @display("p=1500,1500");
+            @display("p=150,150");
         }
         gnb1: gNodeB {
             parameters:
                 @display("is=l;r=5000");
         }
-//        gnb2: gNodeB {
-//            parameters:
-//                @display("is=l;r=5000");
-//        }
+        gnb2: gNodeB {
+            parameters:
+                @display("is=l;r=5000");
+        }
 
         client[nClients]: TumClient {
             parameters:
-                @display("is=vs;i=device/pocketpc;p=800,100,m,6,100,100;");
+                @display("is=vs;i=device/pocketpc;p=80,10,m,6,100,100;");
         }
         train[nTrains]: TumTrain5G;
 
         server: TumServer {
         	parameters:
-        	    @display("p=500,200;i=device/server");
+        	    @display("p=50,20;i=device/server");
         }
         clientRouter: Router {
         	parameters:
-        	    @display("p=550,300;i=device/smallrouter");
+        	    @display("p=55,30;i=device/smallrouter");
         }
         trainRouter: Router {
         	parameters:
-        	    @display("p=450,300;i=device/smallrouter");
+        	    @display("p=45,30;i=device/smallrouter");
         }
     connections:
         //# Data Network connections
@@ -118,8 +118,8 @@ network MuenchenNetwork
 	    //# 5G Core Network connections
         upf.pppg++ <--> Eth10G <--> iUpf.pppg++;
         iUpf.pppg++ <--> Eth10G <--> gnb1.ppp;
-//        iUpf.pppg++ <--> Eth10G <--> gnb2.ppp;
+        iUpf.pppg++ <--> Eth10G <--> gnb2.ppp;
 
 		//# X2 connections
-//        gnb1.x2++ <--> Eth10G <--> gnb2.x2++;
+        gnb1.x2++ <--> Eth10G <--> gnb2.x2++;
 }

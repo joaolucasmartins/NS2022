@@ -38,9 +38,9 @@ def parse():
     parser.add_argument('--srcDir', default='muenchen', type=str, help='source directory of data files')
     parser.add_argument('--destDir', default='../proj/simulations/mobility/', type=str, help='destination directory of the configuration')
 
-    parser.add_argument('--ix', default=6650, type=int, help='initial x train position')
+    parser.add_argument('--ix', default=4100, type=int, help='initial x train position')
     parser.add_argument('--iy', default=100, type=int, help='initial y train position')
-    parser.add_argument('--fx', default=6850, type=int, help='final x train position')
+    parser.add_argument('--fx', default=4300, type=int, help='final x train position')
     parser.add_argument('--fy', default=100, type=int, help='final y train position')
 
     namespace = parser.parse_args()
