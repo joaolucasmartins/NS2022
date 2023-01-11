@@ -29,6 +29,8 @@ ${SIMU5G}/src/libsimu5g.so:
 libs: ${INET}/src/libINET.so ${SIMU5G}/src/libsimu5g.so
 
 proj/tum: libs
+	sed -i'' -e 's|INET4_4_PROJ=.*$\|INET4_4_PROJ=${INET}|' proj/Makefile
+	sed -i'' -e 's|SIMU5G_1_2_1_PROJ=.*$\|SIMU5G_1_2_1_PROJ=${SIMU5G}|' proj/Makefile
 	cd proj/ && make
 
 simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability
