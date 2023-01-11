@@ -2,52 +2,45 @@
 
 
 INET := /home/tiago/Documents/tum/ns/inet4.4
+SIMU5G := /home/tiago/Documents/tum/ns/Simu5G-1.2.1
+
 
 CONFIGURATIONS := Default NonFrequentUpdates Scalability
 
+OMNET_FLAGS = -n .:../src:${INET}/src:${SIMU5G}/src \
+		-l ${INET}/src/INET \
+		-l ${SIMU5G}/src/simu5g \
+		-u Cmdenv \
+		-r 0 \
+		-s \
+		-f omnetpp.ini
 
 all: mobility_configs
 
 
 # ---------- COMPILING ----------
-.PHONY: inet simulations
-inet:
+.PHONY: libs simulations
+${INET}/src/libINET.so:
 	cd ${INET} && make
 
-proj/tum: inet
+${SIMU5G}/src/libsimu5g.so:
+	cd ${SIMU5G} && make
+
+libs: ${INET}/src/libINET.so ${SIMU5G}/src/libsimu5g.so
+
+proj/tum: libs
 	cd proj/ && make
 
 simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability
 
 proj/simulations/Default: proj/tum mobility_configs
-	cd proj/simulations && ../tum\
-		-n .:../src:${INET}/src \
-		-l ${INET}/src/INET \
-		-u Cmdenv \
-		-c Default \
-		-r 0 \
-		-s \
-		-f omnetpp.ini
+	cd proj/simulations && ../tum -c Default ${OMNET_FLAGS}
 
 proj/simulations/NonFrequentUpdates: proj/tum mobility_configs
-	cd proj/simulations && ../tum\
-		-n .:../src:${INET}/src \
-		-l ${INET}/src/INET \
-		-u Cmdenv \
-		-c NonFrequentUpdates \
-		-r 0 \
-		-s \
-		-f omnetpp.ini
+	cd proj/simulations && ../tum -c NonFrequentUpdates ${OMNET_FLAGS}
 
 proj/simulations/Scalability: proj/tum mobility_configs
-	cd proj/simulations && ../tum\
-		-n .:../src:${INET}/src \
-		-l ${INET}/src/INET \
-		-u Cmdenv \
-		-c Scalability \
-		-r 0 \
-		-s \
-		-f omnetpp.ini
+	cd proj/simulations && ../tum -c Scalability ${OMNET_FLAGS}
 
 
 # ---------- RESULT COLLECTINO & PLOTTING ----------
@@ -72,13 +65,13 @@ proj/simulations/mobility:
 mobility_configs: proj/simulations/mobility/offPeak.ini proj/simulations/mobility/rushHour.ini proj/simulations/mobility/weekend.ini
 
 proj/simulations/mobility/offPeak.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv preprocessing/export_trains.py venv
-	. venv/bin/activate && cd preprocessing && python export_trains.py offPeak mon 15:00:00 mon 15:05:00 -r S2 -r S8 --timeScale 10
+	. venv/bin/activate && cd preprocessing && python export_trains.py offPeak mon 15:00:00 mon 16:00:00 -r S2 -r S8 --timeScale 10
 
 proj/simulations/mobility/rushHour.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv preprocessing/export_trains.py venv
-	. venv/bin/activate && cd preprocessing && python export_trains.py rushHour mon 06:30:00 mon 06:35:00 -r S2 -r S8 --timeScale 10
+	. venv/bin/activate && cd preprocessing && python export_trains.py rushHour mon 06:30:00 mon 07:30:00 -r S2 -r S8 --timeScale 10
 
 proj/simulations/mobility/weekend.ini: proj/simulations/mobility preprocessing/muenchen/denormalized.csv preprocessing/export_trains.py venv
-	. venv/bin/activate && cd preprocessing && python export_trains.py weekend sat 10:00:00 sat 10:05:00 -r S2 -r S8 --timeScale 10
+	. venv/bin/activate && cd preprocessing && python export_trains.py weekend sat 10:00:00 sat 11:00:00 -r S2 -r S8 --timeScale 10
 
 
 # ---------- Python Virtual Env ----------
