@@ -1,9 +1,6 @@
 .PHONY: clean cleanall all omnet
 
-
-INET := /home/tiago/Documents/tum/ns/inet4.4
-SIMU5G := /home/tiago/Documents/tum/ns/Simu5G-1.2.1
-
+include config.mk
 
 CONFIGURATIONS := Default NonFrequentUpdates Scalability
 
@@ -29,8 +26,11 @@ ${SIMU5G}/src/libsimu5g.so:
 libs: ${INET}/src/libINET.so ${SIMU5G}/src/libsimu5g.so
 
 proj/tum: libs
-	sed -i'' -e 's|INET4_4_PROJ=.*$\|INET4_4_PROJ=${INET}|' proj/Makefile
-	sed -i'' -e 's|SIMU5G_1_2_1_PROJ=.*$\|SIMU5G_1_2_1_PROJ=${SIMU5G}|' proj/Makefile
+	cd proj/ && opp_makemake -f --deep -O out -o tum -KINET_PROJ=${INET} -KSIMU5G_PROJ=${SIMU5G} \
+		-I. -I$$\(INET_PROJ\)/src -I$$\(SIMU5G_PROJ\)/src \
+		-L$$\(INET_PROJ\)/src -L$$\(SIMU5G_PROJ\)/src \
+		-lINET$$\(D\)\
+		-DINET_IMPORT
 	cd proj/ && make
 
 simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability

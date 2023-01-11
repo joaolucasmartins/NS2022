@@ -50,3 +50,8 @@ proj/simulations/.cmdenv-log
 # Files automatically generated
 preprocessing/muenchen/
 proj/simulations/mobility/
+
+
+# Makefiles
+proj/Makefile
+config.mk
