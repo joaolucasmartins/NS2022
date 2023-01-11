@@ -31,12 +31,12 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
     if (in.fail())
         throw cRuntimeError("Cannot open file '%s'", filename.c_str());
 
-    int maxLat, maxLon, nNodes, nEdges;
-    in >> maxLat >> maxLon >> nNodes;
+    int maxY, maxX, nNodes, nEdges;
+    in >> maxY >> maxX >> nNodes;
 
     cDisplayString &dp = getParentModule()->getDisplayString();
-    dp.setTagArg("bgb", 0, maxLat);
-    dp.setTagArg("bgb", 1, maxLon);
+    dp.setTagArg("bgb", 0, maxY);
+    dp.setTagArg("bgb", 1, maxX);
 
     if (!addFigs)
         return;
@@ -44,6 +44,13 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
     fGroup = new cGroupFigure("networkMap");
     getParentModule()->getCanvas()->addFigure(fGroup);
     fGroup->lowerToBottom();
+
+    cLineFigure *line = new cLineFigure("handover-line");
+    line->setStart(cFigure::Point(maxX,0));
+    line->setEnd(cFigure::Point(0,maxY));
+    line->setLineWidth(2);
+    line->setEndArrowhead(cFigure::ARROW_NONE);
+    fGroup->addFigure(line);
 
     cGroupFigure *connGroup = new cGroupFigure("connections");
     fGroup->addFigure(connGroup);

@@ -105,7 +105,7 @@ network MuenchenNetwork
         	parameters:
         	    @display("p=45,30;i=device/smallrouter");
         }
-    connections:
+    connections:        
         //# Data Network connections
         for i=0..nClients-1 {
             client[i].ethg++ <--> C <--> clientRouter.ethg++;

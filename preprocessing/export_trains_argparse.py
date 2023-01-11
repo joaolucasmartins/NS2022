@@ -38,6 +38,8 @@ def parse():
     parser.add_argument('--srcDir', default='muenchen', type=str, help='source directory of data files')
     parser.add_argument('--destDir', default='../proj/simulations/mobility/', type=str, help='destination directory of the configuration')
 
+    parser.add_argument('--timeScale', default=1, type=float, help='will divide by output time scale by TS')
+
     parser.add_argument('--ix', default=4100, type=int, help='initial x train position')
     parser.add_argument('--iy', default=100, type=int, help='initial y train position')
     parser.add_argument('--fx', default=4300, type=int, help='final x train position')

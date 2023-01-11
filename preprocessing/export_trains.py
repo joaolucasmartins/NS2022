@@ -1,4 +1,7 @@
 import os.path
+import math
+
+import numpy as np
 
 import export_trains_argparse
 import common
@@ -27,6 +30,8 @@ INITIAL_Y = args.iy
 FINAL_X = args.fx
 FINAL_Y = args.fy
 
+TIME_SCALE = args.timeScale
+
 
 loader = common.GTFSLoader(SRC_DIR)
 
@@ -42,11 +47,19 @@ days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 START_T = loader.parse_time(START_T) + days.index(START_DAY) * 24 * 3600
 END_T = loader.parse_time(END_T) + days.index(END_DAY) * 24 * 3600
 
-
-
 # Filter out unwanted entries
 data.drop(data.loc[(data['departure_time'] < START_T) | (data['arrival_time'] > END_T), :].index, inplace=True)
 data.drop(data.loc[~(data['route_short_name'].isin(ROUTES)), :].index, inplace=True)
+
+
+# Apply time scale
+START_T = math.floor(START_T / TIME_SCALE)
+END_T = math.ceil(END_T / TIME_SCALE)
+
+data['arrival_time'] =  (data.loc[:, 'arrival_time'] / TIME_SCALE).astype(np.int64)
+data['departure_time'] =  (data.loc[:, 'departure_time'] / TIME_SCALE).astype(np.int64)
+
+
 
 trains =  []
 # Export train data
@@ -62,8 +75,11 @@ for _, row in data.iterrows():
             trains.append((trip_start_t, old_row['departure_time'] - START_T, old_row['route_short_name'], bonnmotion))
         
         # Reset
-        trip_start_t = row['arrival_time'] - START_T
+        trip_start_t = max(0, row['arrival_time'] - START_T)
         bonnmotion = []
+
+        if (trip_start_t < 0):
+            print(row['trip_id'], row['arrival_time'], START_T)
 
     # Continuing trip
     if row['arrival_time'] != row['departure_time'] and row['arrival_time'] >= START_T:
