@@ -129,7 +129,11 @@ def addStatistics(df, colname):
 def generatePlots(sca_df, vec_df, config_name):
     try:
         mkdir("plots")
-        mkdir(path.join("plots", config_name))
+    except OSError as _:
+        pass
+
+    try:
+        mkdir(path.join("plots", configname))
     except OSError as _:
         pass
     # Set filters
@@ -192,7 +196,7 @@ def generatePlots(sca_df, vec_df, config_name):
 
     for text, NBins, data, unit in linePlots:
         plotLine(text, NBins, data, unit, config_name)
-    
+
     for text, data in histPlots:
         drawHist(text, data, config_name)
 
@@ -240,7 +244,7 @@ def plotLine(text_info, N, data, unit, config_name, legend_from_modules=True, le
         ax.legend(labels=legend)
     ax.set_xlabel(x_text)
     ax.set_ylabel(y_text)
-    
+
     plt.savefig(path.join("plots", config_name, config_name + "_" + title),
         bbox_inches='tight', dpi=400)
 
@@ -252,7 +256,7 @@ def drawHist(text_info, data, config_name):
         kde = True
     else:
         kde = False
-    
+
     title, x_text, y_text = text_info
     df = pd.DataFrame(values).melt(var_name='column', value_name='data')
     sns.displot(data=df,
