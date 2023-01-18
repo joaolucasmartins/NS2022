@@ -15,8 +15,6 @@
 
 package tum.tumtrain;
 
-import inet.node.inet.StandardHost;
-
 import simu5g.nodes.NR.NRUe;
 
 module TumTrain5G extends NRUe
