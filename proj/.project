@@ -3,8 +3,8 @@
 	<name>tum</name>
 	<comment></comment>
 	<projects>
-		<project>inet</project>
-		<project>simu5g</project>
+		<project>inet4.4</project>
+		<project>Simu5G-1.2.1</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

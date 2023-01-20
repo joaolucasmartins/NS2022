@@ -28,6 +28,8 @@
 #include "../../common/ClientResponsePacket.h"
 #include "../../common/TrainInfo.h"
 
+#include <iostream>
+
 Define_Module(TumClientServerApp);
 
 TrainManager* TumClientServerApp::getTrainManager() {
@@ -47,7 +49,7 @@ void TumClientServerApp::initialize(int stage)
 
         delay = par("replyDelay");
         maxMsgDelay = 0;
-
+        std::cout << "Boop" << std::endl;
         // statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
 

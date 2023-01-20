@@ -24,6 +24,8 @@
 #include "../common/ClientPacket.h"
 #include "TumClientApp.h"
 
+#include <iostream>
+
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 
@@ -90,7 +92,7 @@ void TumClientApp::sendRequest()
 {
     const auto& payload = makeShared<ClientPacket>();
     this->timestampReq = simTime();
-
+    std::cout << "Req" << std::endl;
     Packet *packet = new Packet("data");
     payload->setTracks(this->tracksToRequest);
     payload->setChunkLength(B(1));

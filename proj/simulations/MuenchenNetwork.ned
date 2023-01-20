@@ -24,7 +24,6 @@ import inet.node.ethernet.Eth10G;
 import inet.node.inet.Router;
 
 import tum.tumclient.TumClient;
-import tum.tumclient.TumClient5G;
 import tum.tumtrain.TumTrain;
 import tum.tumtrain.TumTrain5G;
 import tum.tumserver.TumServer;
@@ -99,7 +98,7 @@ network MuenchenNetwork
                 @display("is=l;r=5000");
         }
 
-        client[nClients]: TumClient5G {
+        client[nClients]: TumClient {
             parameters:
                 @display("is=vs;i=device/pocketpc");
         }
