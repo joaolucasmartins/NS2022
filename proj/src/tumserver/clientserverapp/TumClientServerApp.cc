@@ -160,9 +160,8 @@ void TumClientServerApp::handleMessage(cMessage *msg)
 
 
             // Generate response with requested track information
-            TrainManager *manager = getTrainManager();
             const ClientPacket *clientMsg = static_cast<const ClientPacket*>(appmsg.get());
-            map<int, vector<TrainInfo>> trackInfo = manager->getTrackInfo(clientMsg->getTracks());
+            map<int, vector<TrainInfo>> trackInfo = trainManager->getTrackInfo(clientMsg->getTracks());
             filterPackets(trackInfo);
             ClientResponsePacket responseMsg(trackInfo);
             EV_INFO << "------------------" << endl;
