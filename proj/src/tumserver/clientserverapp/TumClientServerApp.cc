@@ -33,8 +33,8 @@
 Define_Module(TumClientServerApp);
 
 TrainManager* TumClientServerApp::getTrainManager() {
-    auto parentMod = getParentModule();
-    auto trainManager = static_cast<TrainManager*>(parentMod->getSubmodule("trainManager"));
+    cModule *module = getModuleByPath("server.trainManager");
+    trainManager = static_cast<TrainManager*>(module);
     return trainManager;
 }
 
@@ -59,6 +59,8 @@ void TumClientServerApp::initialize(int stage)
         WATCH(bytesSent);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        getTrainManager();
+
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         socket.setOutputGate(gate("socketOut"));

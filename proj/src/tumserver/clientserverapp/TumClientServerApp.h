@@ -46,12 +46,11 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     cOutVector numTrainUpdatesDroppedVec;
 
     std::map<int, ChunkQueue> socketQueue;
+    TrainManager *trainManager = nullptr;
 
     void filterPackets(map<int, vector<TrainInfo>> &trackInfo);
 
   public:
-    TrainManager* getTrainManager();
-
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);
 
@@ -60,6 +59,9 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
+
+  private:
+    TrainManager* getTrainManager();
 };
 
 #endif
