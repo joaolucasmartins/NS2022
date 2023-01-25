@@ -21,31 +21,36 @@
 #include <inet/networklayer/common/L3AddressTag_m.h>
 #include <inet/transportlayer/common/L4PortTag_m.h>
 
-// Include Device App and its Packets
+#include <apps/mec/DeviceApp/DeviceAppMessages/DeviceAppPacket_m.h>
+#include <apps/mec/DeviceApp/DeviceAppMessages/DeviceAppPacket_Types.h>
 
+#include "../common/ClientResponsePacket.h"
 #include "../common/ClientPacket.h"
-#include "TumClientApp.h"
+#include "TumClientApp5G.h"
 
-#include <iostream>
+#include <fstream>
 
-Define_Module(TumClientApp);
+using namespace inet;
+using namespace std;
 
-TumClientApp::~TumClientApp()
+Define_Module(TumClientApp5G);
+
+TumClientApp5G::TumClientApp5G()
 {
     selfStart_ = NULL;
     selfStop_ = NULL;
 }
 
-TumClientApp::~TumClientApp()
+TumClientApp5G::~TumClientApp5G()
 {
     cancelAndDelete(selfStart_);
     cancelAndDelete(selfStop_);
     cancelAndDelete(selfMecAppStart_);
 }
 
-void TumClientApp::initialize(int stage)
+void TumClientApp5G::initialize(int stage)
 {
-    EV << "TumClientApp::initialize - stage " << stage << endl;
+    EV << "TumClientApp5G::initialize - stage " << stage << endl;
     cSimpleModule::initialize(stage);
     // avoid multiple initializations
     if (stage != inet::INITSTAGE_APPLICATION_LAYER)
@@ -92,20 +97,20 @@ void TumClientApp::initialize(int stage)
     selfStop_ = new cMessage("selfStop");
     selfMecAppStart_ = new cMessage("selfMecAppStart");
 
-    // starting TcpClientApp
+    // starting TumClientApp5G
     simtime_t startTime = par("startTime");
-    EV << "TcpClientApp::initialize - starting sendStartMEWarningAlertApp() in " << startTime << " seconds " << endl;
+    EV << "TumClientApp5G::initialize - starting sendStartMEWarningAlertApp() in " << startTime << " seconds " << endl;
     scheduleAt(simTime() + startTime, selfStart_);
 
     // testing
-    EV << "TcpClientApp::initialize - sourceAddress: " << sourceSimbolicAddress << " [" << inet::L3AddressResolver().resolve(sourceSimbolicAddress).str() << "]" << endl;
-    EV << "TcpClientApp::initialize - destAddress: " << deviceSimbolicAppAddress_ << " [" << deviceAppAddress_.str() << "]" << endl;
-    EV << "TcpClientApp::initialize - binding to port: local:" << localPort_ << " , dest:" << deviceAppPort_ << endl;
+    EV << "TumClientApp5G::initialize - sourceAddress: " << sourceSimbolicAddress << " [" << inet::L3AddressResolver().resolve(sourceSimbolicAddress).str() << "]" << endl;
+    EV << "TumClientApp5G::initialize - destAddress: " << deviceSimbolicAppAddress_ << " [" << deviceAppAddress_.str() << "]" << endl;
+    EV << "TumClientApp5G::initialize - binding to port: local:" << localPort_ << " , dest:" << deviceAppPort_ << endl;
 }
 
 // Application Functions
 
-void TumClientApp::sendRequest()
+void TumClientApp5G::sendRequest()
 {
     const auto &payload = makeShared<ClientPacket>();
     this->timestampReq = simTime();
@@ -122,7 +127,7 @@ void TumClientApp::sendRequest()
         myfile.open("example.txt", ios::app);
         if (myfile.is_open())
         {
-            myfile << "[" << NOW << "] TcpClientApp - UE sent start subscription message to the MEC application \n";
+            myfile << "[" << omnetpp::simTime() << "] TumClientApp5G - UE sent start subscription message to the MEC application \n";
             myfile.close();
         }
     }
@@ -131,11 +136,10 @@ void TumClientApp::sendRequest()
     EV_INFO << "sending client request with " << this->tracksToRequest.size() << " tracks\n";
 }
 
-void TumClientApp::receiveResponse()
+void TumClientApp5G::receiveResponse()
 {
-    simtime_t now = simTime();
-    timeToResponseStats.collect(now - this->timestampReq);
-    timeToResponseVec.record(now - this->timestampReq);
+    timeToResponseStats.collect(omnetpp::simTime() - this->timestampReq);
+    timeToResponseVec.record(omnetpp::simTime() - this->timestampReq);
 
     if (numRequestsToSend > 0)
     {
@@ -151,15 +155,14 @@ void TumClientApp::receiveResponse()
     else
     {
         EV_INFO << "reply to last request arrived, closing\n";
-        close();
     }
 }
 
 // MEC Functions
 
-void TcpClientApp::handleMessage(cMessage *msg)
+void TumClientApp5G::handleMessage(cMessage *msg)
 {
-    EV << "TcpClientApp::handleMessage" << endl;
+    EV << "TumClientApp5G::handleMessage" << endl;
     // Sender Side
     if (msg->isSelfMessage())
     {
@@ -176,7 +179,7 @@ void TcpClientApp::handleMessage(cMessage *msg)
         }
 
         else
-            throw cRuntimeError("TcpClientApp::handleMessage - \tWARNING: Unrecognized self message");
+            throw cRuntimeError("TumClientApp5G::handleMessage - \tWARNING: Unrecognized self message");
     }
     // Receiver Side
     else
@@ -195,7 +198,7 @@ void TcpClientApp::handleMessage(cMessage *msg)
             auto mePkt = packet->peekAtFront<DeviceAppPacket>();
 
             if (mePkt == 0)
-                throw cRuntimeError("TcpClientApp::handleMessage - \tFATAL! Error when casting to DeviceAppPacket");
+                throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to DeviceAppPacket");
 
             if (!strcmp(mePkt->getType(), ACK_START_MECAPP))
                 handleAckStartMEWarningAlertApp(msg);
@@ -205,7 +208,7 @@ void TcpClientApp::handleMessage(cMessage *msg)
 
             else
             {
-                throw cRuntimeError("TcpClientApp::handleMessage - \tFATAL! Error, DeviceAppPacket type %s not recognized", mePkt->getType());
+                throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, DeviceAppPacket type %s not recognized", mePkt->getType());
             }
         }
         // From MEC application
@@ -214,23 +217,23 @@ void TcpClientApp::handleMessage(cMessage *msg)
 
             auto mePkt = packet->peekAtFront<ClientResponsePacket>();
             if (mePkt == 0)
-                throw cRuntimeError("TcpClientApp::handleMessage - \tFATAL! Error when casting to ClientResponsePacket");
+                throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to ClientResponsePacket");
 
             receiveResponse();
 
             // auto mePkt = packet->peekAtFront<WarningAppPacket>();
             // if (mePkt == 0)
-            // throw cRuntimeError("TcpClientApp::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
+            // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
 
             // if (!strcmp(mePkt->getType(), WARNING_ALERT))
             // handleInfoMEWarningAlertApp(msg);
             // else if (!strcmp(mePkt->getType(), START_NACK))
             //{
-            // EV << "TcpClientApp::handleMessage - MEC app did not started correctly, trying to start again" << endl;
+            // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
             //}
             // else if (!strcmp(mePkt->getType(), START_ACK))
             //{
-            // EV << "TcpClientApp::handleMessage - MEC app started correctly" << endl;
+            // EV << "TumClientApp5G::handleMessage - MEC app started correctly" << endl;
             // if (selfMecAppStart_->isScheduled())
             //{
             // cancelEvent(selfMecAppStart_);
@@ -238,20 +241,20 @@ void TcpClientApp::handleMessage(cMessage *msg)
             //}
             // else
             //{
-            // throw cRuntimeError("TcpClientApp::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
+            // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
             //}
         }
         delete msg;
     }
 }
 
-void TcpClientApp::finish()
+void TumClientApp5G::finish()
 {
 }
 /*
  * -----------------------------------------------Sender Side------------------------------------------
  */
-void TcpClientApp::sendStartMEWarningAlertApp()
+void TumClientApp5G::sendStartMEWarningAlertApp()
 {
     inet::Packet *packet = new inet::Packet("WarningAlertPacketStart");
     auto start = inet::makeShared<DeviceAppStartPacket>();
@@ -274,7 +277,7 @@ void TcpClientApp::sendStartMEWarningAlertApp()
         myfile.open("example.txt", ios::app);
         if (myfile.is_open())
         {
-            myfile << "[" << NOW << "] TcpClientApp - UE sent start message to the Device App \n";
+            myfile << "[" << omnetpp::simTime() << "] TumClientApp5G - UE sent start message to the Device App \n";
             myfile.close();
         }
     }
@@ -283,9 +286,9 @@ void TcpClientApp::sendStartMEWarningAlertApp()
     scheduleAt(simTime() + period_, selfStart_);
 }
 
-void TcpClientApp::sendStopMEWarningAlertApp()
+void TumClientApp5G::sendStopMEWarningAlertApp()
 {
-    EV << "TcpClientApp::sendStopMEWarningAlertApp - Sending " << STOP_MEAPP << " type WarningAlertPacket\n";
+    EV << "TumClientApp5G::sendStopMEWarningAlertApp - SENDING type WarningAlertPacket\n";
 
     inet::Packet *packet = new inet::Packet("DeviceAppStopPacket");
     auto stop = inet::makeShared<DeviceAppStopPacket>();
@@ -305,7 +308,7 @@ void TcpClientApp::sendStopMEWarningAlertApp()
         myfile.open("example.txt", ios::app);
         if (myfile.is_open())
         {
-            myfile << "[" << NOW << "] TcpClientApp - UE sent stop message to the Device App \n";
+            myfile << "[" << omnetpp::simTime() << "] TumClientApp5G - UE sent stop message to the Device App \n";
             myfile.close();
         }
     }
@@ -319,7 +322,7 @@ void TcpClientApp::sendStopMEWarningAlertApp()
 /*
  * ---------------------------------------------Receiver Side------------------------------------------
  */
-void TcpClientApp::handleAckStartMEWarningAlertApp(cMessage *msg)
+void TumClientApp5G::handleAckStartMEWarningAlertApp(cMessage *msg)
 {
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
     auto pkt = packet->peekAtFront<DeviceAppStartAckPacket>();
@@ -328,32 +331,31 @@ void TcpClientApp::handleAckStartMEWarningAlertApp(cMessage *msg)
     {
         mecAppAddress_ = L3AddressResolver().resolve(pkt->getIpAddress());
         mecAppPort_ = pkt->getPort();
-        EV << "TcpClientApp::handleAckStartMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket. mecApp isntance is at: " << mecAppAddress_ << ":" << mecAppPort_ << endl;
+        EV << "TumClientApp5G::handleAckStartMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket. mecApp isntance is at: " << mecAppAddress_ << ":" << mecAppPort_ << endl;
         cancelEvent(selfStart_);
         // scheduling sendStopMEWarningAlertApp()
         if (!selfStop_->isScheduled())
         {
             simtime_t stopTime = par("stopTime");
             scheduleAt(simTime() + stopTime, selfStop_);
-            EV << "TcpClientApp::handleAckStartMEWarningAlertApp - Starting sendStopMEWarningAlertApp() in " << stopTime << " seconds " << endl;
+            EV << "TumClientApp5G::handleAckStartMEWarningAlertApp - Starting sendStopMEWarningAlertApp() in " << stopTime << " seconds " << endl;
         }
     }
     else
     {
-        EV << "TcpClientApp::handleAckStartMEWarningAlertApp - MEC application cannot be instantiated! Reason: " << pkt->getReason() << endl;
+        EV << "TumClientApp5G::handleAckStartMEWarningAlertApp - MEC application cannot be instantiated! Reason: " << pkt->getReason() << endl;
     }
 
-    sendMessageToMECApp();
     scheduleAt(simTime() + period_, selfMecAppStart_);
 }
 
-void TcpClientApp::handleAckStopMEWarningAlertApp(cMessage *msg)
+void TumClientApp5G::handleAckStopMEWarningAlertApp(cMessage *msg)
 {
 
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
     auto pkt = packet->peekAtFront<DeviceAppStopAckPacket>();
 
-    EV << "TcpClientApp::handleAckStopMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket with result: " << pkt->getResult() << endl;
+    EV << "TumClientApp5G::handleAckStopMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket with result: " << pkt->getResult() << endl;
     if (pkt->getResult() == false)
         EV << "Reason: " << pkt->getReason() << endl;
     // updating runtime color of the car icon background

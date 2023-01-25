@@ -26,7 +26,7 @@
 
 using namespace omnetpp;
 
-class TumClientApp : public cSimpleModule
+class TumClientApp5G : public cSimpleModule
 {
   // communication to device app and mec app
   inet::UdpSocket socket;
@@ -44,6 +44,7 @@ class TumClientApp : public cSimpleModule
   inet::L3Address mecAppAddress_;
   int mecAppPort_;
 
+  cModule* ue;
   std::string mecAppName;
 
   // scheduling
@@ -56,21 +57,23 @@ class TumClientApp : public cSimpleModule
 
   cHistogram timeToResponseStats;
   cOutVector timeToResponseVec;
+  simtime_t timestampReq;
 
   int numRequestsToSend = 0; // requests to send in this session
-
 public:
-  ~TumClientApp();
-  TumClientApp();
+  ~TumClientApp5G();
+  TumClientApp5G();
 
 protected:
+  void sendRequest();
+  void receiveResponse();
+
   virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
   void initialize(int stage);
   virtual void handleMessage(cMessage *msg);
   virtual void finish();
 
   void sendStartMEWarningAlertApp();
-  void sendMessageToMECApp();
   void sendStopMEWarningAlertApp();
 
   void handleAckStartMEWarningAlertApp(cMessage *msg);
