@@ -48,4 +48,3 @@ simple TumClientApp like IApp {
         input socketIn @labels(TcpCommand/up);
         output socketOut @labels(TcpCommand/down);
 }
-
