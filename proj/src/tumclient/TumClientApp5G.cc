@@ -28,6 +28,7 @@
 #include "../common/ClientPacket.h"
 #include "TumClientApp5G.h"
 
+#include <iostream>
 #include <fstream>
 
 using namespace inet;
@@ -60,7 +61,7 @@ void TumClientApp5G::initialize(int stage)
     timeToResponseVec.setName("timeToResponse");
 
     // App Params
-    numRequestsToSend = par("numRequestsPerSession");
+    numRequestsToSend = par("numRequests");
     const string tracksToRequestParameter = par("tracksToRequest");
     istringstream ss{tracksToRequestParameter};
     int track_no;
@@ -351,7 +352,6 @@ void TumClientApp5G::handleAckStartMEWarningAlertApp(cMessage *msg)
 
 void TumClientApp5G::handleAckStopMEWarningAlertApp(cMessage *msg)
 {
-
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
     auto pkt = packet->peekAtFront<DeviceAppStopAckPacket>();
 

@@ -58,6 +58,10 @@ network MuenchenNetwork
             @display("ls=lightgray,0.25");
         }
     submodules:
+        routingRecorder: RoutingTableRecorder {
+            @display("p=100,600;is=s");
+        }
+
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s;");
@@ -71,14 +75,11 @@ network MuenchenNetwork
         channelControl: LteChannelControl {
             @display("p=100,300;is=s;");
         }
-        carrierAggregation: CarrierAggregation {
-            @display("p=100,400;is=s;");
-        }
         binder: Binder {
             @display("p=100,500;is=s;");
         }
-        routingRecorder: RoutingTableRecorder {
-            @display("p=100,600;is=s");
+        carrierAggregation: CarrierAggregation {
+            @display("p=100,400;is=s;");
         }
         upf: Upf {
             @display("p=300,300");
@@ -107,10 +108,10 @@ network MuenchenNetwork
             parameters:
                 @display("p=50,20;i=device/server");
         }
-//        clientRouter: Router {
-//            parameters:
-//                @display("p=55,30;i=device/smallrouter");
-//        }
+        upfRouter: Router {
+            parameters:
+                @display("p=45,30;i=device/smallrouter");
+        }
         trainRouter: Router {
             parameters:
                 @display("p=45,30;i=device/smallrouter");
@@ -127,14 +128,9 @@ network MuenchenNetwork
             @display("p=545.0638,158.76625;i=device/smallrouter");
         }
     connections:
-        //# Data Network connections
-        //        for i=0..nClients-1 {
-        //            client[i].ethg++ <--> C <--> clientRouter.ethg++;
-        //        }
-        trainRouter.pppg++ <--> Eth10G <--> upf.filterGate;
-
-//        clientRouter.ethg++ <--> C <--> server.ethg++;
+        upfRouter.pppg++ <--> Eth10G <--> upf.filterGate;
         trainRouter.ethg++ <--> C <--> server.ethg++;
+        upfRouter.pppg++ <--> Eth10G <--> trainRouter.pppg++;
 
 	    //# 5G Core Network connections
         upf.pppg++ <--> Eth10G <--> iUpf.pppg++;
@@ -146,7 +142,7 @@ network MuenchenNetwork
         gnb1.x2++ <--> Eth10G <--> gnb2.x2++;
         
         //# MEC stuff
-        ualcmp.ppp++ <--> Eth10G <--> upf2.filterGate;
+        ualcmp.ppp++ <--> Eth10G <--> upfRouter.pppg++;
 
         ualcmp.toMecOrchestrator --> mecOrchestrator.fromUALCMP;
         ualcmp.fromMecOrchestrator <-- mecOrchestrator.toUALCMP;
