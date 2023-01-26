@@ -21,6 +21,7 @@
 #include <omnetpp.h>
 
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -30,10 +31,12 @@ class TumClientApp5G : public cSimpleModule
 {
   // communication to device app and mec app
   inet::UdpSocket socket;
+  inet::TcpSocket appSocket;
 
   int size_;
   simtime_t period_;
-  int localPort_;
+  int appLocalPort_;
+  int deviceLocalPort_;
   int deviceAppPort_;
   inet::L3Address deviceAppAddress_;
 
@@ -60,6 +63,8 @@ class TumClientApp5G : public cSimpleModule
   simtime_t timestampReq;
 
   int numRequestsToSend = 0; // requests to send in this session
+
+  static simsignal_t connectSignal;
 public:
   ~TumClientApp5G();
   TumClientApp5G();
@@ -67,6 +72,11 @@ public:
 protected:
   void sendRequest();
   void receiveResponse();
+
+  /* TCP Utility functions */
+  virtual void connect();
+  virtual void close();
+  virtual void sendPacket(Packet *pkt);
 
   virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
   void initialize(int stage);

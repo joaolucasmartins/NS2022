@@ -34,6 +34,8 @@
 using namespace inet;
 using namespace std;
 
+simsignal_t TumClientApp5G::connectSignal = registerSignal("connect");
+
 Define_Module(TumClientApp5G);
 
 TumClientApp5G::TumClientApp5G()
@@ -76,7 +78,7 @@ void TumClientApp5G::initialize(int stage)
     // retrieve parameters
     size_ = par("packetSize");
     period_ = par("period");
-    localPort_ = par("localPort");
+    deviceLocalPort_ = par("deviceLocalPort");
     deviceAppPort_ = par("deviceAppPort");
     sourceSimbolicAddress = (char *)getParentModule()->getFullName();
     deviceSimbolicAppAddress_ = (char *)par("deviceAppAddress").stringValue();
@@ -84,7 +86,7 @@ void TumClientApp5G::initialize(int stage)
 
     // binding socket
     socket.setOutputGate(gate("socketOut"));
-    socket.bind(localPort_);
+    socket.bind(deviceLocalPort_);
 
     int tos = par("tos");
     if (tos != -1)
@@ -103,10 +105,19 @@ void TumClientApp5G::initialize(int stage)
     EV << "TumClientApp5G::initialize - starting sendStartMEWarningAlertApp() in " << startTime << " seconds " << endl;
     scheduleAt(simTime() + startTime, selfStart_);
 
+    // TCP parameters
+    int appLocalPort = par("appLocalPort");
+    // TODO appSocket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), appLocalPort);
+    appSocket.bind(appLocalPort);
+
+    // appSocket.setCallback(this);
+    appSocket.setOutputGate(gate("appSocketOut"));
+
     // testing
     EV << "TumClientApp5G::initialize - sourceAddress: " << sourceSimbolicAddress << " [" << inet::L3AddressResolver().resolve(sourceSimbolicAddress).str() << "]" << endl;
     EV << "TumClientApp5G::initialize - destAddress: " << deviceSimbolicAppAddress_ << " [" << deviceAppAddress_.str() << "]" << endl;
-    EV << "TumClientApp5G::initialize - binding to port: local:" << localPort_ << " , dest:" << deviceAppPort_ << endl;
+    EV << "TumClientApp5G::initialize - binding app to port: local:" << deviceLocalPort_ << " , dest:" << deviceAppPort_ << endl;
+    EV << "TumClientApp5G::initialize - binding app to port: local:" << appLocalPort_ << endl;
 }
 
 // Application Functions
@@ -362,4 +373,52 @@ void TumClientApp5G::handleAckStopMEWarningAlertApp(cMessage *msg)
     ue->getDisplayString().setTagArg("i", 1, "white");
 
     cancelEvent(selfStop_);
+}
+
+//-------------------------- TCP Part -----------------------
+void TumClientApp5G::connect()
+{
+    // we need a new connId if this is not the first connection
+    appSocket.renewSocket();
+
+    const char *appLocalAddress = par("appLocalAddress");
+    int applocalPort = par("applocalPort");
+    appSocket.bind(*appLocalAddress ? L3AddressResolver().resolve(appLocalAddress) : L3Address(), applocalPort);
+
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        appSocket.setTimeToLive(timeToLive);
+
+    int dscp = par("dscp");
+    if (dscp != -1)
+        appSocket.setDscp(dscp);
+
+    int tos = par("tos");
+    if (tos != -1)
+        appSocket.setTos(tos);
+
+    // connect
+    EV_INFO << "Connecting to mec host (" << mecAppAddress_ << ") port=" << mecAppPort_ << endl;
+
+    appSocket.connect(mecAppAddress_, mecAppPort_);
+
+    // TODO numSessions++;
+    emit(connectSignal, 1L);
+}
+
+void TumClientApp5G::close()
+{
+    EV_INFO << "issuing CLOSE command\n";
+    socket.close();
+    emit(connectSignal, -1L);
+}
+
+void TumClientApp5G::sendPacket(Packet *msg)
+{
+    int numBytes = msg->getByteLength();
+    emit(packetSentSignal, msg);
+    socket.send(msg);
+
+    // TODO packetsSent++;
+    // TODO bytesSent += numBytes;
 }

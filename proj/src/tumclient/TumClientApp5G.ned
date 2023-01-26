@@ -24,7 +24,8 @@ simple TumClientApp5G like IApp {
         volatile int numRequests = default(1);  // number of requests sent
 
         //connection infos
-        int localPort = default(4000);
+        int appLocalPort = default(4000);
+        int deviceLocalPort = default(4001);
         int deviceAppPort = default(4000); // ipAddress of the DeviceApp
         string deviceAppAddress; // port of the DeviceApp
                 
@@ -44,5 +45,8 @@ simple TumClientApp5G like IApp {
     gates:
         output socketOut;
         input socketIn;
+
+        input appSocketIn @labels(TcpCommand/up);
+        output appSocketOut @labels(TcpCommand/down);
 }
 
