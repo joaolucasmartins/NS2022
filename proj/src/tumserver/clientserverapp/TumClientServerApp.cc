@@ -28,11 +28,13 @@
 #include "../../common/ClientResponsePacket.h"
 #include "../../common/TrainInfo.h"
 
+#include <iostream>
+
 Define_Module(TumClientServerApp);
 
 TrainManager* TumClientServerApp::getTrainManager() {
-    auto parentMod = getParentModule();
-    auto trainManager = static_cast<TrainManager*>(parentMod->getSubmodule("trainManager"));
+    cModule *module = getModuleByPath("server.trainManager");
+    trainManager = static_cast<TrainManager*>(module);
     return trainManager;
 }
 
@@ -47,7 +49,7 @@ void TumClientServerApp::initialize(int stage)
 
         delay = par("replyDelay");
         maxMsgDelay = 0;
-
+        std::cout << "Boop" << std::endl;
         // statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
 
@@ -57,6 +59,8 @@ void TumClientServerApp::initialize(int stage)
         WATCH(bytesSent);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        getTrainManager();
+
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         socket.setOutputGate(gate("socketOut"));
@@ -148,6 +152,7 @@ void TumClientServerApp::handleMessage(cMessage *msg)
             bytesRcvd += B(appmsg->getChunkLength()).get();
 
             EV_INFO << "received request with " << appmsg->getTracks().size() << " tracks\n";
+            std::cout << "RECEV << endl";
             // TODO simtime_t msgDelay = appmsg->getReplyDelay();
             // if (msgDelay > maxMsgDelay)
             //    maxMsgDelay = msgDelay;
@@ -156,9 +161,8 @@ void TumClientServerApp::handleMessage(cMessage *msg)
 
 
             // Generate response with requested track information
-            TrainManager *manager = getTrainManager();
             const ClientPacket *clientMsg = static_cast<const ClientPacket*>(appmsg.get());
-            map<int, vector<TrainInfo>> trackInfo = manager->getTrackInfo(clientMsg->getTracks());
+            map<int, vector<TrainInfo>> trackInfo = trainManager->getTrackInfo(clientMsg->getTracks());
             filterPackets(trackInfo);
             ClientResponsePacket responseMsg(trackInfo);
             EV_INFO << "------------------" << endl;

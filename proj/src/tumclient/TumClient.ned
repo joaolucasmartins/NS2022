@@ -15,8 +15,8 @@
 
 package tum.tumclient;
 
-import inet.node.inet.StandardHost;
+import simu5g.nodes.NR.NRUe;
 
-module TumClient extends StandardHost
+module TumClient extends NRUe
 {
 }
