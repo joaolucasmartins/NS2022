@@ -102,7 +102,7 @@ void TumClientApp5G::initialize(int stage)
 
     // starting TumClientApp5G
     simtime_t startTime = par("startTime");
-    EV << "TumClientApp5G::initialize - starting sendStartMEWarningAlertApp() in " << startTime << " seconds " << endl;
+    EV << "TumClientApp5G::initialize - starting sendStartMETumClientApp() in " << startTime << " seconds " << endl;
     scheduleAt(simTime() + startTime, selfStart_);
 
     // TCP parameters
@@ -170,8 +170,6 @@ void TumClientApp5G::receiveResponse()
     }
 }
 
-// MEC Functions
-
 void TumClientApp5G::handleMessage(cMessage *msg)
 {
     EV << "TumClientApp5G::handleMessage" << endl;
@@ -179,10 +177,10 @@ void TumClientApp5G::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         if (!strcmp(msg->getName(), "selfStart"))
-            sendStartMEWarningAlertApp();
+            sendStartMETumClientApp();
 
         else if (!strcmp(msg->getName(), "selfStop"))
-            sendStopMEWarningAlertApp();
+            sendStopMETumClientApp();
 
         else if (!strcmp(msg->getName(), "selfMecAppStart"))
         {
@@ -213,10 +211,10 @@ void TumClientApp5G::handleMessage(cMessage *msg)
                 throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to DeviceAppPacket");
 
             if (!strcmp(mePkt->getType(), ACK_START_MECAPP))
-                handleAckStartMEWarningAlertApp(msg);
+                handleAckStartMETumClientApp(msg);
 
             else if (!strcmp(mePkt->getType(), ACK_STOP_MECAPP))
-                handleAckStopMEWarningAlertApp(msg);
+                handleAckStopMETumClientApp(msg);
 
             else
             {
@@ -238,7 +236,7 @@ void TumClientApp5G::handleMessage(cMessage *msg)
             // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
 
             // if (!strcmp(mePkt->getType(), WARNING_ALERT))
-            // handleInfoMEWarningAlertApp(msg);
+            // handleInfoMETumClientApp(msg);
             // else if (!strcmp(mePkt->getType(), START_NACK))
             //{
             // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
@@ -260,21 +258,23 @@ void TumClientApp5G::handleMessage(cMessage *msg)
     }
 }
 
+// MEC Functions
+
 void TumClientApp5G::finish()
 {
 }
 /*
  * -----------------------------------------------Sender Side------------------------------------------
  */
-void TumClientApp5G::sendStartMEWarningAlertApp()
+void TumClientApp5G::sendStartMETumClientApp()
 {
-    inet::Packet *packet = new inet::Packet("WarningAlertPacketStart");
+    inet::Packet *packet = new inet::Packet("TumClientPacketStart");
     auto start = inet::makeShared<DeviceAppStartPacket>();
 
     // instantiation requirements and info
     start->setType(START_MECAPP);
     start->setMecAppName(mecAppName.c_str());
-    // start->setMecAppProvider("lte.apps.mec.warningAlert_rest.MEWarningAlertApp_rest_External");
+    // start->setMecAppProvider("lte.apps.mec.TumClient_rest.METumClientApp_rest_External");
 
     start->setChunkLength(inet::B(2 + mecAppName.size() + 1));
     start->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
@@ -298,9 +298,9 @@ void TumClientApp5G::sendStartMEWarningAlertApp()
     scheduleAt(simTime() + period_, selfStart_);
 }
 
-void TumClientApp5G::sendStopMEWarningAlertApp()
+void TumClientApp5G::sendStopMETumClientApp()
 {
-    EV << "TumClientApp5G::sendStopMEWarningAlertApp - SENDING type WarningAlertPacket\n";
+    EV << "TumClientApp5G::sendStopMETumClientApp - SENDING type TumClientPacket\n";
 
     inet::Packet *packet = new inet::Packet("DeviceAppStopPacket");
     auto stop = inet::makeShared<DeviceAppStopPacket>();
@@ -334,7 +334,7 @@ void TumClientApp5G::sendStopMEWarningAlertApp()
 /*
  * ---------------------------------------------Receiver Side------------------------------------------
  */
-void TumClientApp5G::handleAckStartMEWarningAlertApp(cMessage *msg)
+void TumClientApp5G::handleAckStartMETumClientApp(cMessage *msg)
 {
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
     auto pkt = packet->peekAtFront<DeviceAppStartAckPacket>();
@@ -343,30 +343,30 @@ void TumClientApp5G::handleAckStartMEWarningAlertApp(cMessage *msg)
     {
         mecAppAddress_ = L3AddressResolver().resolve(pkt->getIpAddress());
         mecAppPort_ = pkt->getPort();
-        EV << "TumClientApp5G::handleAckStartMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket. mecApp isntance is at: " << mecAppAddress_ << ":" << mecAppPort_ << endl;
+        EV << "TumClientApp5G::handleAckStartMETumClientApp - Received " << pkt->getType() << " type TumClientPacket. mecApp isntance is at: " << mecAppAddress_ << ":" << mecAppPort_ << endl;
         cancelEvent(selfStart_);
-        // scheduling sendStopMEWarningAlertApp()
+        // scheduling sendStopMETumClientApp()
         if (!selfStop_->isScheduled())
         {
             simtime_t stopTime = par("stopTime");
             scheduleAt(simTime() + stopTime, selfStop_);
-            EV << "TumClientApp5G::handleAckStartMEWarningAlertApp - Starting sendStopMEWarningAlertApp() in " << stopTime << " seconds " << endl;
+            EV << "TumClientApp5G::handleAckStartMETumClientApp - Starting sendStopMETumClientApp() in " << stopTime << " seconds " << endl;
         }
     }
     else
     {
-        EV << "TumClientApp5G::handleAckStartMEWarningAlertApp - MEC application cannot be instantiated! Reason: " << pkt->getReason() << endl;
+        EV << "TumClientApp5G::handleAckStartMETumClientApp - MEC application cannot be instantiated! Reason: " << pkt->getReason() << endl;
     }
 
     scheduleAt(simTime() + period_, selfMecAppStart_);
 }
 
-void TumClientApp5G::handleAckStopMEWarningAlertApp(cMessage *msg)
+void TumClientApp5G::handleAckStopMETumClientApp(cMessage *msg)
 {
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
     auto pkt = packet->peekAtFront<DeviceAppStopAckPacket>();
 
-    EV << "TumClientApp5G::handleAckStopMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket with result: " << pkt->getResult() << endl;
+    EV << "TumClientApp5G::handleAckStopMETumClientApp - Received " << pkt->getType() << " type TumClientPacket with result: " << pkt->getResult() << endl;
     if (pkt->getResult() == false)
         EV << "Reason: " << pkt->getReason() << endl;
     // updating runtime color of the car icon background

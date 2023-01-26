@@ -83,12 +83,12 @@ protected:
   virtual void handleMessage(cMessage *msg);
   virtual void finish();
 
-  void sendStartMEWarningAlertApp();
-  void sendStopMEWarningAlertApp();
+  void sendStartMETumClientApp();
+  void sendStopMETumClientApp();
 
-  void handleAckStartMEWarningAlertApp(cMessage *msg);
-  void handleInfoMEWarningAlertApp(cMessage *msg);
-  void handleAckStopMEWarningAlertApp(cMessage *msg);
+  void handleAckStartMETumClientApp(cMessage *msg);
+  void handleInfoMETumClientApp(cMessage *msg);
+  void handleAckStopMETumClientApp(cMessage *msg);
 
   vector<int> tracksToRequest;
 };
