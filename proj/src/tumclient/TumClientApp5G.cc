@@ -49,7 +49,6 @@ TumClientApp5G::~TumClientApp5G()
 {
     cancelAndDelete(selfStart_);
     cancelAndDelete(selfStop_);
-    cancelAndDelete(selfMecAppStart_);
     cancelAndDelete(selfSend_);
 }
 
@@ -79,7 +78,6 @@ void TumClientApp5G::initialize(int stage)
 
     // retrieve parameters
     size_ = par("packetSize");
-    period_ = par("period");
     deviceLocalPort_ = par("deviceLocalPort");
     deviceAppPort_ = par("deviceAppPort");
     sourceSimbolicAddress = (char *)getParentModule()->getFullName();
@@ -100,7 +98,6 @@ void TumClientApp5G::initialize(int stage)
     // initializing the auto-scheduling messages
     selfStart_ = new cMessage("selfStart");
     selfStop_ = new cMessage("selfStop");
-    selfMecAppStart_ = new cMessage("selfMecAppStart");
     selfSend_ = new cMessage("selfSend");
 
     // starting TumClientApp5G
@@ -116,7 +113,6 @@ void TumClientApp5G::initialize(int stage)
     EV << "TumClientApp5G::initialize - sourceAddress: " << sourceSimbolicAddress << " [" << inet::L3AddressResolver().resolve(sourceSimbolicAddress).str() << "]" << endl;
     EV << "TumClientApp5G::initialize - destAddress: " << deviceSimbolicAppAddress_ << " [" << deviceAppAddress_.str() << "]" << endl;
     EV << "TumClientApp5G::initialize - binding app to port: local:" << deviceLocalPort_ << " , dest:" << deviceAppPort_ << endl;
-    EV << "TumClientApp5G::initialize - binding app to port: local:" << appLocalPort_ << endl;
 }
 
 
@@ -138,8 +134,6 @@ void TumClientApp5G::handleSelfMessage(cMessage *msg) {
         sendStartMETumClientApp();
     else if (!strcmp(msg->getName(), "selfStop"))
         sendStopMETumClientApp();
-    else if (!strcmp(msg->getName(), "selfMecAppStart"))
-        scheduleAt(simTime() + period_, selfMecAppStart_);
     else if (!strcmp(msg->getName(), "selfSend"))
         sendRequest();
     else
@@ -182,32 +176,6 @@ void TumClientApp5G::handleUdpMessage(cMessage *msg) {
 
 void TumClientApp5G::handleTcpMessage(cMessage *msg) {
     appSocket.processMessage(msg);
-
-    // receiveResponse();
-
-
-    // auto mePkt = packet->peekAtFront<WarningAppPacket>();
-    // if (mePkt == 0)
-    // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
-
-    // if (!strcmp(mePkt->getType(), WARNING_ALERT))
-    // handleInfoMETumClientApp(msg);
-    // else if (!strcmp(mePkt->getType(), START_NACK))
-    //{
-    // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
-    //}
-    // else if (!strcmp(mePkt->getType(), START_ACK))
-    //{
-    // EV << "TumClientApp5G::handleMessage - MEC app started correctly" << endl;
-    // if (selfMecAppStart_->isScheduled())
-    //{
-    // cancelEvent(selfMecAppStart_);
-    //}
-    //}
-    // else
-    //{
-    // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
-    //}
 }
 
 
@@ -243,8 +211,6 @@ void TumClientApp5G::sendStartMETumClientApp()
         }
     }
 
-    // rescheduling
-    scheduleAt(simTime() + period_, selfStart_);
 }
 
 void TumClientApp5G::sendStopMETumClientApp()
@@ -277,7 +243,6 @@ void TumClientApp5G::sendStopMETumClientApp()
     // rescheduling
     if (selfStop_->isScheduled())
         cancelEvent(selfStop_);
-    scheduleAt(simTime() + period_, selfStop_);
 }
 
 /*
@@ -295,20 +260,12 @@ void TumClientApp5G::handleAckStartMETumClientApp(cMessage *msg)
         EV << "TumClientApp5G::handleAckStartMETumClientApp - Received " << pkt->getType() << " type TumClientPacket. mecApp isntance is at: " << mecAppAddress_ << ":" << mecAppPort_ << endl;
         cancelEvent(selfStart_);
         this->connect();
-        // scheduling sendStopMETumClientApp()
-        if (!selfStop_->isScheduled())
-        {
-            simtime_t stopTime = par("stopTime");
-            scheduleAt(simTime() + stopTime, selfStop_);
-            EV << "TumClientApp5G::handleAckStartMETumClientApp - Starting sendStopMETumClientApp() in " << stopTime << " seconds " << endl;
-        }
     }
     else
     {
         EV << "TumClientApp5G::handleAckStartMETumClientApp - MEC application cannot be instantiated! Reason: " << pkt->getReason() << endl;
     }
 
-    scheduleAt(simTime() + period_, selfMecAppStart_);
 }
 
 void TumClientApp5G::handleAckStopMETumClientApp(cMessage *msg)

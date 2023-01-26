@@ -34,7 +34,6 @@ class TumClientApp5G : public cSimpleModule, public TcpSocket::ICallback
   inet::TcpSocket appSocket;
 
   int size_;
-  simtime_t period_;
   int deviceLocalPort_;
   int deviceAppPort_;
   inet::L3Address deviceAppAddress_;
@@ -52,7 +51,6 @@ class TumClientApp5G : public cSimpleModule, public TcpSocket::ICallback
   // scheduling
   cMessage *selfStart_;
   cMessage *selfStop_;
-  cMessage *selfMecAppStart_;
   cMessage *selfSend_;
 
 
@@ -77,11 +75,10 @@ protected:
   /* TCP Utility functions */
   virtual void connect();
   virtual void close();
-  virtual void sendPacket(Packet *pkt);
 
-  virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
-  void initialize(int stage);
-  virtual void handleMessage(cMessage *msg);
+  virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
+  void initialize(int stage) override;
+  virtual void handleMessage(cMessage *msg) override;
   void handleSelfMessage(cMessage *msg);
   void handleUdpMessage(cMessage *msg);
   void handleTcpMessage(cMessage *msg);

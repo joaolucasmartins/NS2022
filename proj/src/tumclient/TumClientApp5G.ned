@@ -33,9 +33,7 @@ simple TumClientApp5G like IApp {
         int packetSize = default(10);
      
         //autoscheduling infos
-        double period @unit("s") = default(1s);
-        double startTime @unit("s") = default(5s); 
-        double stopTime @unit("s") = default(120s);
+        double startTime @unit("s") = default(0s);
         
         string mecAppName = default("TumClientServerApp"); // TODO Change this
 		
