@@ -27,7 +27,7 @@
 
 using namespace omnetpp;
 
-class TumClientApp5G : public cSimpleModule
+class TumClientApp5G : public cSimpleModule, public TcpSocket::ICallback
 {
   // communication to device app and mec app
   inet::UdpSocket socket;
@@ -81,6 +81,9 @@ protected:
   virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
   void initialize(int stage);
   virtual void handleMessage(cMessage *msg);
+  void handleSelfMessage(cMessage *msg);
+  void handleUdpMessage(cMessage *msg);
+  void handleTcpMessage(cMessage *msg);
   virtual void finish();
 
   void sendStartMETumClientApp();
@@ -91,6 +94,16 @@ protected:
   void handleAckStopMETumClientApp(cMessage *msg);
 
   vector<int> tracksToRequest;
+
+  /* TcpSocket::ICallback callback methods */
+  virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+  virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
+  virtual void socketEstablished(TcpSocket *socket) override;
+  virtual void socketPeerClosed(TcpSocket *socket) override;
+  virtual void socketClosed(TcpSocket *socket) override;
+  virtual void socketFailure(TcpSocket *socket, int code) override;
+  virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
+  virtual void socketDeleted(TcpSocket *socket) override {}
 };
 
 #endif

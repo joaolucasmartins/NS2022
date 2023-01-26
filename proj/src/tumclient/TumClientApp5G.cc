@@ -174,88 +174,91 @@ void TumClientApp5G::receiveResponse()
 void TumClientApp5G::handleMessage(cMessage *msg)
 {
     EV << "TumClientApp5G::handleMessage" << endl;
-    // Sender Side
+
     if (msg->isSelfMessage())
+        handleSelfMessage(msg);
+    else if (socket.belongsToSocket(msg))
+        handleUdpMessage(msg);
+    else if (appSocket.belongsToSocket(msg))
+        handleTcpMessage(msg);
+}
+
+
+void TumClientApp5G::handleSelfMessage(cMessage *msg) {
+    if (!strcmp(msg->getName(), "selfStart"))
+        sendStartMETumClientApp();
+    else if (!strcmp(msg->getName(), "selfStop"))
+        sendStopMETumClientApp();
+    else if (!strcmp(msg->getName(), "selfMecAppStart"))
+        scheduleAt(simTime() + period_, selfMecAppStart_);
+    else
+        throw cRuntimeError("TumClientApp5G::handleMessage - \tWARNING: Unrecognized self message");
+}
+
+
+void TumClientApp5G::handleUdpMessage(cMessage *msg) {
+    inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
+
+    inet::L3Address ipAdd = packet->getTag<L3AddressInd>()->getSrcAddress();
+    // int port = packet->getTag<L4PortInd>()->getSrcPort();
+
+    /*
+     * From Device app
+     * device app usually runs in the UE (loopback), but it could also run in other places
+     */
+    if (ipAdd == deviceAppAddress_ || ipAdd == inet::L3Address("127.0.0.1")) // dev app
     {
-        if (!strcmp(msg->getName(), "selfStart"))
-            sendStartMETumClientApp();
+        auto mePkt = packet->peekAtFront<DeviceAppPacket>();
 
-        else if (!strcmp(msg->getName(), "selfStop"))
-            sendStopMETumClientApp();
+        if (mePkt == 0)
+            throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to DeviceAppPacket");
 
-        else if (!strcmp(msg->getName(), "selfMecAppStart"))
-        {
-            sendRequest();
-            scheduleAt(simTime() + period_, selfMecAppStart_);
-        }
+        if (!strcmp(mePkt->getType(), ACK_START_MECAPP))
+            handleAckStartMETumClientApp(msg);
+
+        else if (!strcmp(mePkt->getType(), ACK_STOP_MECAPP))
+            handleAckStopMETumClientApp(msg);
 
         else
-            throw cRuntimeError("TumClientApp5G::handleMessage - \tWARNING: Unrecognized self message");
-    }
-    // UDP Receiver Side (DeviceApp)
-    else if (socket.belongsToSocket(msg))
-    {
-        inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
-
-        inet::L3Address ipAdd = packet->getTag<L3AddressInd>()->getSrcAddress();
-        // int port = packet->getTag<L4PortInd>()->getSrcPort();
-
-        /*
-         * From Device app
-         * device app usually runs in the UE (loopback), but it could also run in other places
-         */
-        if (ipAdd == deviceAppAddress_ || ipAdd == inet::L3Address("127.0.0.1")) // dev app
         {
-            auto mePkt = packet->peekAtFront<DeviceAppPacket>();
-
-            if (mePkt == 0)
-                throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to DeviceAppPacket");
-
-            if (!strcmp(mePkt->getType(), ACK_START_MECAPP))
-                handleAckStartMETumClientApp(msg);
-
-            else if (!strcmp(mePkt->getType(), ACK_STOP_MECAPP))
-                handleAckStopMETumClientApp(msg);
-
-            else
-            {
-                throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, DeviceAppPacket type %s not recognized", mePkt->getType());
-            }
+            throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, DeviceAppPacket type %s not recognized", mePkt->getType());
         }
-
-        delete msg;
-    } else if (appSocket.belongsToSocket(msg)) {
-        // TCP: From MEC application
-
-        appSocket.processMessage(msg);
-
-        // receiveResponse();
-
-
-        // auto mePkt = packet->peekAtFront<WarningAppPacket>();
-        // if (mePkt == 0)
-        // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
-
-        // if (!strcmp(mePkt->getType(), WARNING_ALERT))
-        // handleInfoMETumClientApp(msg);
-        // else if (!strcmp(mePkt->getType(), START_NACK))
-        //{
-        // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
-        //}
-        // else if (!strcmp(mePkt->getType(), START_ACK))
-        //{
-        // EV << "TumClientApp5G::handleMessage - MEC app started correctly" << endl;
-        // if (selfMecAppStart_->isScheduled())
-        //{
-        // cancelEvent(selfMecAppStart_);
-        //}
-        //}
-        // else
-        //{
-        // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
-        //}
     }
+
+    delete msg;
 }
+
+
+void TumClientApp5G::handleTcpMessage(cMessage *msg) {
+    appSocket.processMessage(msg);
+
+    // receiveResponse();
+
+
+    // auto mePkt = packet->peekAtFront<WarningAppPacket>();
+    // if (mePkt == 0)
+    // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
+
+    // if (!strcmp(mePkt->getType(), WARNING_ALERT))
+    // handleInfoMETumClientApp(msg);
+    // else if (!strcmp(mePkt->getType(), START_NACK))
+    //{
+    // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
+    //}
+    // else if (!strcmp(mePkt->getType(), START_ACK))
+    //{
+    // EV << "TumClientApp5G::handleMessage - MEC app started correctly" << endl;
+    // if (selfMecAppStart_->isScheduled())
+    //{
+    // cancelEvent(selfMecAppStart_);
+    //}
+    //}
+    // else
+    //{
+    // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
+    //}
+}
+
 
 // MEC Functions
 
@@ -423,3 +426,59 @@ void TumClientApp5G::sendPacket(Packet *msg)
     // TODO packetsSent++;
     // TODO bytesSent += numBytes;
 }
+
+
+// ------------------- TCP Callbacks -------------------
+void TumClientApp5G::socketEstablished(TcpSocket *)
+{
+    // *redefine* to perform or schedule first sending
+    EV_INFO << "connected\n";
+    sendRequest();
+}
+
+void TumClientApp5G::socketDataArrived(TcpSocket *, Packet *msg, bool)
+{
+    // *redefine* to perform or schedule next sending
+//    packetsRcvd++;
+//    bytesRcvd += msg->getByteLength();
+
+    // TODO: SCHEDULE NEXT SEND
+
+    emit(packetReceivedSignal, msg);
+    delete msg;
+}
+
+void TumClientApp5G::socketPeerClosed(TcpSocket *socket_)
+{
+    ASSERT(socket_ == &socket);
+    // close the connection (if not already closed)
+    if (socket.getState() == TcpSocket::PEER_CLOSED) {
+        EV_INFO << "remote TCP closed, closing here as well\n";
+        close();
+    }
+}
+
+void TumClientApp5G::socketClosed(TcpSocket *)
+{
+    // *redefine* to start another session etc.
+    EV_INFO << "connection closed\n";
+}
+
+void TumClientApp5G::socketFailure(TcpSocket *, int code)
+{
+    // subclasses may override this function, and add code try to reconnect after a delay.
+    EV_WARN << "connection broken\n";
+//    numBroken++;
+}
+
+
+
+
+
+
+
+
+
+
+
+
