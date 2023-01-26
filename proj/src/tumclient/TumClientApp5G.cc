@@ -111,7 +111,7 @@ void TumClientApp5G::initialize(int stage)
     //appSocket.bind(appLocalPort);
 
     // appSocket.setCallback(this);
-    appSocket.setOutputGate(gate("appSocketOut"));
+    appSocket.setOutputGate(gate("socketOut"));
 
     // testing
     EV << "TumClientApp5G::initialize - sourceAddress: " << sourceSimbolicAddress << " [" << inet::L3AddressResolver().resolve(sourceSimbolicAddress).str() << "]" << endl;
@@ -192,10 +192,9 @@ void TumClientApp5G::handleMessage(cMessage *msg)
         else
             throw cRuntimeError("TumClientApp5G::handleMessage - \tWARNING: Unrecognized self message");
     }
-    // Receiver Side
-    else
+    // UDP Receiver Side (DeviceApp)
+    else if (socket.belongsToSocket(msg))
     {
-        std::cout << "_" << *msg << "_" << endl;
         inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
 
         inet::L3Address ipAdd = packet->getTag<L3AddressInd>()->getSrcAddress();
@@ -223,39 +222,39 @@ void TumClientApp5G::handleMessage(cMessage *msg)
                 throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, DeviceAppPacket type %s not recognized", mePkt->getType());
             }
         }
-        // From MEC application
-        else
-        {
 
-            auto mePkt = packet->peekAtFront<ClientResponsePacket>();
-            if (mePkt == 0)
-                throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to ClientResponsePacket");
+        delete msg;
+    } else if (appSocket.belongsToSocket(msg)) {
+        // TCP: From MEC application
 
-            receiveResponse();
+        appSocket.processMessage(msg);
 
-            // auto mePkt = packet->peekAtFront<WarningAppPacket>();
-            // if (mePkt == 0)
-            // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
+        // receiveResponse();
 
-            // if (!strcmp(mePkt->getType(), WARNING_ALERT))
-            // handleInfoMETumClientApp(msg);
-            // else if (!strcmp(mePkt->getType(), START_NACK))
-            //{
-            // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
-            //}
-            // else if (!strcmp(mePkt->getType(), START_ACK))
-            //{
-            // EV << "TumClientApp5G::handleMessage - MEC app started correctly" << endl;
-            // if (selfMecAppStart_->isScheduled())
-            //{
-            // cancelEvent(selfMecAppStart_);
-            //}
-            //}
-            // else
-            //{
-            // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
-            //}
-        }
+
+        // auto mePkt = packet->peekAtFront<WarningAppPacket>();
+        // if (mePkt == 0)
+        // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
+
+        // if (!strcmp(mePkt->getType(), WARNING_ALERT))
+        // handleInfoMETumClientApp(msg);
+        // else if (!strcmp(mePkt->getType(), START_NACK))
+        //{
+        // EV << "TumClientApp5G::handleMessage - MEC app did not started correctly, trying to start again" << endl;
+        //}
+        // else if (!strcmp(mePkt->getType(), START_ACK))
+        //{
+        // EV << "TumClientApp5G::handleMessage - MEC app started correctly" << endl;
+        // if (selfMecAppStart_->isScheduled())
+        //{
+        // cancelEvent(selfMecAppStart_);
+        //}
+        //}
+        // else
+        //{
+        // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
+        //}
+
         delete msg;
     }
 }
@@ -383,7 +382,7 @@ void TumClientApp5G::connect()
 {
     std::cout << "CONNECT" << endl;
     // we need a new connId if this is not the first connection
-    appSocket.renewSocket();
+     appSocket.renewSocket();
 
     //const char *appLocalAddress = par("localAddress");
     //int applocalPort = par("applocalPort");

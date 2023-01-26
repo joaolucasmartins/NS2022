@@ -49,8 +49,5 @@ simple TumClientApp5G like IApp {
     gates:
         output socketOut;
         input socketIn;
-
-        input appSocketIn @labels(TcpCommand/up);
-        output appSocketOut @labels(TcpCommand/down);
 }
 
