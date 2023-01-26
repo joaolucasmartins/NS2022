@@ -254,8 +254,6 @@ void TumClientApp5G::handleMessage(cMessage *msg)
         //{
         // throw cRuntimeError("TumClientApp5G::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
         //}
-
-        delete msg;
     }
 }
 
