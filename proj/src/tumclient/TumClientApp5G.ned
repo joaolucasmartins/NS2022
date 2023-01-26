@@ -22,9 +22,10 @@ simple TumClientApp5G like IApp {
         string tracksToRequest; // tracks, separated by whitespaces, to request info on
         volatile double thinkTime @unit(s); // time gap between requests
         volatile int numRequests = default(1);  // number of requests sent
+        volatile double idleInterval @unit(s); // time gap between sessions
+        
 
         //connection infos
-        int appLocalPort = default(6000);
         int deviceLocalPort = default(4000);
         int deviceAppPort = default(4000); // ipAddress of the DeviceApp
         string deviceAppAddress; // port of the DeviceApp

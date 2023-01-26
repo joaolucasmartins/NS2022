@@ -35,7 +35,6 @@ class TumClientApp5G : public cSimpleModule, public TcpSocket::ICallback
 
   int size_;
   simtime_t period_;
-  int appLocalPort_;
   int deviceLocalPort_;
   int deviceAppPort_;
   inet::L3Address deviceAppAddress_;
@@ -54,6 +53,8 @@ class TumClientApp5G : public cSimpleModule, public TcpSocket::ICallback
   cMessage *selfStart_;
   cMessage *selfStop_;
   cMessage *selfMecAppStart_;
+  cMessage *selfSend_;
+
 
   // uses to write in a log a file
   bool log;
@@ -84,7 +85,6 @@ protected:
   void handleSelfMessage(cMessage *msg);
   void handleUdpMessage(cMessage *msg);
   void handleTcpMessage(cMessage *msg);
-  virtual void finish();
 
   void sendStartMETumClientApp();
   void sendStopMETumClientApp();
@@ -94,6 +94,7 @@ protected:
   void handleAckStopMETumClientApp(cMessage *msg);
 
   vector<int> tracksToRequest;
+
 
   /* TcpSocket::ICallback callback methods */
   virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;

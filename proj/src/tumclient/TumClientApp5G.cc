@@ -42,6 +42,7 @@ TumClientApp5G::TumClientApp5G()
 {
     selfStart_ = NULL;
     selfStop_ = NULL;
+    selfSend_ = NULL;
 }
 
 TumClientApp5G::~TumClientApp5G()
@@ -49,6 +50,7 @@ TumClientApp5G::~TumClientApp5G()
     cancelAndDelete(selfStart_);
     cancelAndDelete(selfStop_);
     cancelAndDelete(selfMecAppStart_);
+    cancelAndDelete(selfSend_);
 }
 
 void TumClientApp5G::initialize(int stage)
@@ -99,18 +101,15 @@ void TumClientApp5G::initialize(int stage)
     selfStart_ = new cMessage("selfStart");
     selfStop_ = new cMessage("selfStop");
     selfMecAppStart_ = new cMessage("selfMecAppStart");
+    selfSend_ = new cMessage("selfSend");
 
     // starting TumClientApp5G
     simtime_t startTime = par("startTime");
     EV << "TumClientApp5G::initialize - starting sendStartMETumClientApp() in " << startTime << " seconds " << endl;
     scheduleAt(simTime() + startTime, selfStart_);
 
-    // TCP parameters
-    int appLocalPort = par("appLocalPort");
-    // TODO appSocket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), appLocalPort);
-    //appSocket.bind(appLocalPort);
-
-    // appSocket.setCallback(this);
+    // TCP config
+    appSocket.setCallback(this);
     appSocket.setOutputGate(gate("socketOut"));
 
     // testing
@@ -120,56 +119,6 @@ void TumClientApp5G::initialize(int stage)
     EV << "TumClientApp5G::initialize - binding app to port: local:" << appLocalPort_ << endl;
 }
 
-// Application Functions
-
-void TumClientApp5G::sendRequest()
-{
-    std::cout << "SEND" << "_" << endl;
-    const auto &payload = makeShared<ClientPacket>();
-    this->timestampReq = simTime();
-    std::cout << "Req" << std::endl;
-    Packet *packet = new Packet("data");
-    payload->setTracks(this->tracksToRequest);
-    payload->setChunkLength(B(1));
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
-    packet->insertAtBack(payload);
-
-    if (log)
-    {
-        ofstream myfile;
-        myfile.open("example.txt", ios::app);
-        if (myfile.is_open())
-        {
-            myfile << "[" << omnetpp::simTime() << "] TumClientApp5G - UE sent start subscription message to the MEC application \n";
-            myfile.close();
-        }
-    }
-
-    appSocket.send(packet);
-    EV_INFO << "sending client request with " << this->tracksToRequest.size() << " tracks\n";
-}
-
-void TumClientApp5G::receiveResponse()
-{
-    timeToResponseStats.collect(omnetpp::simTime() - this->timestampReq);
-    timeToResponseVec.record(omnetpp::simTime() - this->timestampReq);
-
-    if (numRequestsToSend > 0)
-    {
-        EV_INFO << "reply arrived\n";
-        --numRequestsToSend;
-
-        // if (timeoutMsg)
-        //{
-        // simtime_t d = par("thinkTime");
-        // rescheduleAfterOrDeleteTimer(d, MSGKIND_SEND);
-        //}
-    }
-    else
-    {
-        EV_INFO << "reply to last request arrived, closing\n";
-    }
-}
 
 void TumClientApp5G::handleMessage(cMessage *msg)
 {
@@ -191,6 +140,8 @@ void TumClientApp5G::handleSelfMessage(cMessage *msg) {
         sendStopMETumClientApp();
     else if (!strcmp(msg->getName(), "selfMecAppStart"))
         scheduleAt(simTime() + period_, selfMecAppStart_);
+    else if (!strcmp(msg->getName(), "selfSend"))
+        sendRequest();
     else
         throw cRuntimeError("TumClientApp5G::handleMessage - \tWARNING: Unrecognized self message");
 }
@@ -261,10 +212,6 @@ void TumClientApp5G::handleTcpMessage(cMessage *msg) {
 
 
 // MEC Functions
-
-void TumClientApp5G::finish()
-{
-}
 /*
  * -----------------------------------------------Sender Side------------------------------------------
  */
@@ -417,14 +364,38 @@ void TumClientApp5G::close()
     emit(connectSignal, -1L);
 }
 
-void TumClientApp5G::sendPacket(Packet *msg)
+
+void TumClientApp5G::sendRequest()
 {
-    int numBytes = msg->getByteLength();
-    emit(packetSentSignal, msg);
-    socket.send(msg);
+    std::cout << "SEND" << "_" << endl;
+    const auto &payload = makeShared<ClientPacket>();
+    this->timestampReq = simTime();
+    std::cout << "Req" << std::endl;
+    Packet *packet = new Packet("data");
+    payload->setTracks(this->tracksToRequest);
+    payload->setChunkLength(B(1));
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    packet->insertAtBack(payload);
+
+    int numBytes = packet->getByteLength();
+    emit(packetSentSignal, packet);
 
     // TODO packetsSent++;
     // TODO bytesSent += numBytes;
+
+    if (log)
+    {
+        ofstream myfile;
+        myfile.open("example.txt", ios::app);
+        if (myfile.is_open())
+        {
+            myfile << "[" << omnetpp::simTime() << "] TumClientApp5G - UE sent start subscription message to the MEC application \n";
+            myfile.close();
+        }
+    }
+
+    appSocket.send(packet);
+    EV_INFO << "TumClientApp5G::sendRequest - sending client request with " << this->tracksToRequest.size() << " tracks\n";
 }
 
 
@@ -432,8 +403,14 @@ void TumClientApp5G::sendPacket(Packet *msg)
 void TumClientApp5G::socketEstablished(TcpSocket *)
 {
     // *redefine* to perform or schedule first sending
-    EV_INFO << "connected\n";
-    sendRequest();
+    EV_INFO << "TumClientApp5G::socketEstablished - connected\n";
+
+
+    numRequestsToSend = par("numRequestsPerSession");
+    if (numRequestsToSend < 1)
+        numRequestsToSend = 1;
+
+    rescheduleAfter(0, selfSend_);
 }
 
 void TumClientApp5G::socketDataArrived(TcpSocket *, Packet *msg, bool)
@@ -445,15 +422,35 @@ void TumClientApp5G::socketDataArrived(TcpSocket *, Packet *msg, bool)
     // TODO: SCHEDULE NEXT SEND
 
     emit(packetReceivedSignal, msg);
+
+    timeToResponseStats.collect(omnetpp::simTime() - this->timestampReq);
+    timeToResponseVec.record(omnetpp::simTime() - this->timestampReq);
+
+    if (numRequestsToSend > 0)
+    {
+        EV_INFO << "TumClientApp5G::sendRequest - reply arrived\n";
+        --numRequestsToSend;
+
+         simtime_t d = par("thinkTime");
+         rescheduleAfter(d, selfSend_);
+    }
+    else
+    {
+        EV_INFO << "TumClientApp5G::sendRequest - reply to last request arrived\n";
+        close();
+        scheduleAfter(0, selfStop_);
+        cancelEvent(selfSend_);
+    }
+
     delete msg;
 }
 
 void TumClientApp5G::socketPeerClosed(TcpSocket *socket_)
 {
-    ASSERT(socket_ == &socket);
+    ASSERT(socket_ == &appSocket);
     // close the connection (if not already closed)
-    if (socket.getState() == TcpSocket::PEER_CLOSED) {
-        EV_INFO << "remote TCP closed, closing here as well\n";
+    if (appSocket.getState() == TcpSocket::PEER_CLOSED) {
+        EV_INFO << "TumClientApp5G::socketPeerClosed - remote TCP closed, closing here as well\n";
         close();
     }
 }
@@ -461,14 +458,20 @@ void TumClientApp5G::socketPeerClosed(TcpSocket *socket_)
 void TumClientApp5G::socketClosed(TcpSocket *)
 {
     // *redefine* to start another session etc.
-    EV_INFO << "connection closed\n";
+    EV_INFO << "TumClientApp5G::socketClosed - connection closed\n";
+
+    // start another session after a delay
+    simtime_t d = par("idleInterval");
+    rescheduleAfter(d, selfStart_);
 }
 
 void TumClientApp5G::socketFailure(TcpSocket *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
-    EV_WARN << "connection broken\n";
+    EV_WARN << "TumClientApp5G::socketFailure - connection broken\n";
 //    numBroken++;
+
+    runtime_error("TumClientApp5G does not support TCP socket failures");
 }
 
 
