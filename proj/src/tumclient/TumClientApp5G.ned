@@ -30,18 +30,22 @@ simple TumClientApp5G like IApp {
         string deviceAppAddress; // port of the DeviceApp
                 
         int packetSize = default(10);
-        
-        int tos = default(-1); // if not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
-        
+     
         //autoscheduling infos
         double period @unit("s") = default(1s);
-        double startTime @unit("s") = default(0s); 
+        double startTime @unit("s") = default(5s); 
         double stopTime @unit("s") = default(120s);
         
-        string mecAppName = default("MECServerClientApp"); // TODO Change this
-
+        string mecAppName = default("TumClientServerApp"); // TODO Change this
+		
         bool logger = default(false);
-        string interfaceTableModule;
+        string interfaceTableModule;        
+        
+        // TCP
+		int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
+        int dscp = default(-1); // if not -1, set the DSCP (IPv4/IPv6) field of sent packets to this value
+        int tos = default(-1); // if not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
+
     gates:
         output socketOut;
         input socketIn;

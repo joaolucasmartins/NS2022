@@ -108,7 +108,7 @@ void TumClientApp5G::initialize(int stage)
     // TCP parameters
     int appLocalPort = par("appLocalPort");
     // TODO appSocket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), appLocalPort);
-    appSocket.bind(appLocalPort);
+    //appSocket.bind(appLocalPort);
 
     // appSocket.setCallback(this);
     appSocket.setOutputGate(gate("appSocketOut"));
@@ -124,6 +124,7 @@ void TumClientApp5G::initialize(int stage)
 
 void TumClientApp5G::sendRequest()
 {
+    std::cout << "SEND" << "_" << endl;
     const auto &payload = makeShared<ClientPacket>();
     this->timestampReq = simTime();
     std::cout << "Req" << std::endl;
@@ -144,7 +145,7 @@ void TumClientApp5G::sendRequest()
         }
     }
 
-    socket.sendTo(packet, mecAppAddress_, mecAppPort_);
+    appSocket.send(packet);
     EV_INFO << "sending client request with " << this->tracksToRequest.size() << " tracks\n";
 }
 
@@ -194,6 +195,7 @@ void TumClientApp5G::handleMessage(cMessage *msg)
     // Receiver Side
     else
     {
+        std::cout << "_" << *msg << "_" << endl;
         inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
 
         inet::L3Address ipAdd = packet->getTag<L3AddressInd>()->getSrcAddress();
@@ -345,6 +347,7 @@ void TumClientApp5G::handleAckStartMETumClientApp(cMessage *msg)
         mecAppPort_ = pkt->getPort();
         EV << "TumClientApp5G::handleAckStartMETumClientApp - Received " << pkt->getType() << " type TumClientPacket. mecApp isntance is at: " << mecAppAddress_ << ":" << mecAppPort_ << endl;
         cancelEvent(selfStart_);
+        this->connect();
         // scheduling sendStopMETumClientApp()
         if (!selfStop_->isScheduled())
         {
@@ -378,12 +381,13 @@ void TumClientApp5G::handleAckStopMETumClientApp(cMessage *msg)
 //-------------------------- TCP Part -----------------------
 void TumClientApp5G::connect()
 {
+    std::cout << "CONNECT" << endl;
     // we need a new connId if this is not the first connection
     appSocket.renewSocket();
 
-    const char *appLocalAddress = par("appLocalAddress");
-    int applocalPort = par("applocalPort");
-    appSocket.bind(*appLocalAddress ? L3AddressResolver().resolve(appLocalAddress) : L3Address(), applocalPort);
+    //const char *appLocalAddress = par("localAddress");
+    //int applocalPort = par("applocalPort");
+    //appSocket.bind(*appLocalAddress ? L3AddressResolver().resolve(appLocalAddress) : L3Address(), applocalPort);
 
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)

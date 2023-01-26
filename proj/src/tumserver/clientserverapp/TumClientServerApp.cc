@@ -152,6 +152,7 @@ void TumClientServerApp::handleMessage(cMessage *msg)
             bytesRcvd += B(appmsg->getChunkLength()).get();
 
             EV_INFO << "received request with " << appmsg->getTracks().size() << " tracks\n";
+            std::cout << "RECEV << endl";
             // TODO simtime_t msgDelay = appmsg->getReplyDelay();
             // if (msgDelay > maxMsgDelay)
             //    maxMsgDelay = msgDelay;
