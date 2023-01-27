@@ -53,10 +53,6 @@ network MuenchenNetwork
         channel C extends Eth100M
         {
         }
-        channel TC extends Eth100M
-        {
-            @display("ls=lightgray,0.25");
-        }
     submodules:
         routingRecorder: RoutingTableRecorder {
             @display("p=100,600;is=s");
@@ -96,11 +92,11 @@ network MuenchenNetwork
         }
         gnb1: gNodeB {
             parameters:
-                @display("p=500,500;is=l;r=5000,,blue");
+                @display("p=500,500;is=l");
         }
         gnb2: gNodeB {
             parameters:
-                @display("p=3839,3178;is=l;r=5000,,blue");
+                @display("p=3839,3178;is=l");
         }
 
 
