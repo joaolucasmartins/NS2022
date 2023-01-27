@@ -122,10 +122,10 @@ void TumClientApp5G::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
-    else if (socket.belongsToSocket(msg))
-        handleUdpMessage(msg);
     else if (appSocket.belongsToSocket(msg))
         handleTcpMessage(msg);
+    else if (socket.belongsToSocket(msg))
+        handleUdpMessage(msg);
 }
 
 
@@ -215,6 +215,8 @@ void TumClientApp5G::sendStartMETumClientApp()
 
 void TumClientApp5G::sendStopMETumClientApp()
 {
+    return;
+
     EV << "TumClientApp5G::sendStopMETumClientApp - SENDING type TumClientPacket\n";
 
     inet::Packet *packet = new inet::Packet("DeviceAppStopPacket");
@@ -384,21 +386,24 @@ void TumClientApp5G::socketDataArrived(TcpSocket *, Packet *msg, bool)
     timeToResponseStats.collect(omnetpp::simTime() - this->timestampReq);
     timeToResponseVec.record(omnetpp::simTime() - this->timestampReq);
 
-    if (numRequestsToSend > 0)
-    {
+    if (numRequestsToSend > 0) {
         EV_INFO << "TumClientApp5G::socketDataArrived - reply arrived\n";
         --numRequestsToSend;
 
          simtime_t d = par("thinkTime");
          rescheduleAfter(d, selfSend_);
     }
-    else
-    {
-        EV_INFO << "TumClientApp5G::socketDataArrived - reply to last request arrived\n";
-        close();
-        scheduleAfter(0, selfStop_);
-        cancelEvent(selfSend_);
+    else if (!selfSend_->isScheduled()) {
+        simtime_t d = par("idleInterval");
+        rescheduleAfter(d, selfSend_);
     }
+
+//    if (appSocket.getState() != TcpSocket::LOCALLY_CLOSED) {
+//        EV_INFO << "TumClientApp5G::socketDataArrived - reply to last request arrived\n";
+//        close();
+//        scheduleAfter(0, selfStop_);
+//        cancelEvent(selfSend_);
+//    }
 
     delete msg;
 }

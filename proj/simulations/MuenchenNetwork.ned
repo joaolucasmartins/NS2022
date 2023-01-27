@@ -89,20 +89,19 @@ network MuenchenNetwork
             @display("p=3839,3078;is=l");
         }
         iUpf1: Upf {
-            @display("p=500,500");
+            @display("p=600,600");
         }
         iUpf2: Upf {
-            @display("p=3839,3178");
+            @display("p=3739,3078");
         }
         gnb1: gNodeB {
             parameters:
-                @display("p=0,0;is=l;r=5000,,blue");
+                @display("p=500,500;is=l;r=5000,,blue");
         }
         gnb2: gNodeB {
             parameters:
-                @display("p=4339,3678;is=l;r=5000,,blue");
+                @display("p=3839,3178;is=l;r=5000,,blue");
         }
-
 
 
         client[nClients]: TumClient {
