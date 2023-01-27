@@ -133,7 +133,7 @@ def generatePlots(sca_df, vec_df, config_name):
         pass
 
     try:
-        mkdir(path.join("plots", configname))
+        mkdir(path.join("plots", config_name))
     except OSError as _:
         pass
     # Set filters
