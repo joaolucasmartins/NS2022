@@ -53,51 +53,52 @@ network MuenchenNetwork
         channel C extends Eth100M
         {
         }
-        channel TC extends Eth100M
-        {
-            @display("ls=lightgray,0.25");
-        }
     submodules:
         routingRecorder: RoutingTableRecorder {
             @display("p=100,600;is=s");
         }
-
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,100;is=s;");
+                @display("p=100,700;is=s;");
         }
         sbahnNetworkGenerator: SbahnNetworkGenerator {
-            @display("p=100,200;is=s;i=block/wheelbarrow");
+            @display("p=100,800;is=s;i=block/wheelbarrow");
             filename = "sbahn/muenchen_sbahn.txt";
             disable = false;
         }
-
-        channelControl: LteChannelControl {
-            @display("p=100,300;is=s;");
+		carrierAggregation: CarrierAggregation {
+            @display("p=100,900;is=s;");
         }
         binder: Binder {
-            @display("p=100,500;is=s;");
+            @display("p=100,1000;is=s;");
         }
-        carrierAggregation: CarrierAggregation {
-            @display("p=100,400;is=s;");
+        channelControl: LteChannelControl {
+            @display("p=100,1100;is=s;");
         }
-        upf: Upf {
-            @display("p=300,300");
+
+
+
+        mecHost1: MECHost {
+            @display("p=500,600;is=l");
         }
-        upf2: Upf {
-            @display("p=300,1500");
+        mecHost2: MECHost {
+            @display("p=3839,3078;is=l");
         }
-        iUpf: Upf {
-            @display("p=1500,300");
+        iUpf1: Upf {
+            @display("p=600,600");
+        }
+        iUpf2: Upf {
+            @display("p=3739,3078");
         }
         gnb1: gNodeB {
             parameters:
-                @display("is=l;r=5000");
+                @display("p=500,500;is=l");
         }
         gnb2: gNodeB {
             parameters:
-                @display("is=l;r=5000");
+                @display("p=3839,3178;is=l");
         }
+
 
         client[nClients]: TumClient {
             parameters:
@@ -106,26 +107,27 @@ network MuenchenNetwork
         train[nTrains]: TumTrain5G;
         server: TumServer {
             parameters:
-                @display("p=50,20;i=device/server");
+                @display("p=2200,1430;i=device/server");
         }
+
+
         upfRouter: Router {
             parameters:
-                @display("p=45,30;i=device/smallrouter");
+                @display("p=2400,1630;i=device/smallrouter");
         }
         trainRouter: Router {
             parameters:
-                @display("p=45,30;i=device/smallrouter");
-        }
-        mecHost: MECHost {
-            @display("p=352.92624,145.62;is=l");
+                @display("p=2200,1630;i=device/smallrouter");
         }
 
+        upf: Upf {
+            @display("p=2400,1830");
+        }
         mecOrchestrator: MecOrchestrator {
-            @display("p=544.0525,63.70875;is=l");
+            @display("p=2599,1430;is=l");
         }
-
         ualcmp: UALCMP {
-            @display("p=545.0638,158.76625;i=device/smallrouter");
+            @display("p=2600,1630");
         }
     connections:
         upfRouter.pppg++ <--> Eth10G <--> upf.filterGate;
@@ -133,19 +135,20 @@ network MuenchenNetwork
         upfRouter.pppg++ <--> Eth10G <--> trainRouter.pppg++;
 
 	    //# 5G Core Network connections
-        upf.pppg++ <--> Eth10G <--> iUpf.pppg++;
-        upf2.pppg++ <--> Eth10G <--> iUpf.pppg++;
-        iUpf.pppg++ <--> Eth10G <--> gnb1.ppp;
-        iUpf.pppg++ <--> Eth10G <--> gnb2.ppp;
+        upf.pppg++ <--> Eth10G <--> iUpf1.pppg++;
+        upf.pppg++ <--> Eth10G <--> iUpf2.pppg++;
+        iUpf1.pppg++ <--> Eth10G <--> gnb1.ppp;
+        iUpf2.pppg++ <--> Eth10G <--> gnb2.ppp;
 
 		//# X2 connections
         gnb1.x2++ <--> Eth10G <--> gnb2.x2++;
-        
+
         //# MEC stuff
         ualcmp.ppp++ <--> Eth10G <--> upfRouter.pppg++;
 
         ualcmp.toMecOrchestrator --> mecOrchestrator.fromUALCMP;
         ualcmp.fromMecOrchestrator <-- mecOrchestrator.toUALCMP;
 
-        mecHost.ppp++ <--> Eth10G <--> iUpf.pppg++;
+        mecHost1.ppp++ <--> Eth10G <--> iUpf1.pppg++;
+        mecHost2.ppp++ <--> Eth10G <--> iUpf2.pppg++;
 }

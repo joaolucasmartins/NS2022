@@ -21,6 +21,7 @@ package tum.sbahn.networkgenerator;
 simple SbahnNetworkGenerator
 {
     parameters:
-        bool disable;
+        bool disable = default(false);
+        bool handoverLine = default(false);
         string filename;
 }

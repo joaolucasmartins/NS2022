@@ -45,12 +45,15 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
     getParentModule()->getCanvas()->addFigure(fGroup);
     fGroup->lowerToBottom();
 
-    cLineFigure *line = new cLineFigure("handover-line");
-    line->setStart(cFigure::Point(maxX,0));
-    line->setEnd(cFigure::Point(0,maxY));
-    line->setLineWidth(2);
-    line->setEndArrowhead(cFigure::ARROW_NONE);
-    fGroup->addFigure(line);
+    bool renderHandover = par("handoverLine");
+    if (renderHandover) {
+        cLineFigure *line = new cLineFigure("handover-line");
+        line->setStart(cFigure::Point(maxX,0));
+        line->setEnd(cFigure::Point(0,maxY));
+        line->setLineWidth(2);
+        line->setEndArrowhead(cFigure::ARROW_NONE);
+        fGroup->addFigure(line);
+    }
 
     cGroupFigure *connGroup = new cGroupFigure("connections");
     fGroup->addFigure(connGroup);
