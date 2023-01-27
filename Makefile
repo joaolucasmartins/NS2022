@@ -29,7 +29,7 @@ proj/tum: libs
 	cd proj/ && opp_makemake -f --deep -O out -o tum -KINET_PROJ=${INET} -KSIMU5G_PROJ=${SIMU5G} \
 		-I. -I$$\(INET_PROJ\)/src -I$$\(SIMU5G_PROJ\)/src \
 		-L$$\(INET_PROJ\)/src -L$$\(SIMU5G_PROJ\)/src \
-		-lINET$$\(D\)\
+		-lINET$$\(D\) -lsimu5g$$\(D\)
 		-DINET_IMPORT
 	cd proj/ && make
 
