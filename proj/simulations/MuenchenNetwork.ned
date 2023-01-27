@@ -71,7 +71,7 @@ network MuenchenNetwork
             disable = false;
         }
 		carrierAggregation: CarrierAggregation {
-            @display("p=100,1100;is=s;");
+            @display("p=100,900;is=s;");
         }
         binder: Binder {
             @display("p=100,1000;is=s;");
