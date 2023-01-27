@@ -23,7 +23,7 @@ simple TumClientServerApp like IApp
         double trainDropTimeLimit @unit(s) = default(6s);  // Updates older than this parameter will be ignored and dropped
         
         int mecAppId = default(0); // it will be override by getId() in initialize
-        int localUePort = default(0); // not used in MecRequestBackgroundGeneratorApp
+        int localUePort = default(0);
         string mp1Address = default("");
         int mp1Port = default(10021);
      
@@ -32,8 +32,7 @@ simple TumClientServerApp like IApp
         double requiredDisk @unit("B") = default(100MB);
         double requiredCpu = default(15000);
 
-        string localAddress = default(""); // local address; may be left empty ("")
-        int localPort = default(1000);     // localPort number to listen on
+
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
         @lifecycleSupport;

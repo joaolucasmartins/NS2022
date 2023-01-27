@@ -61,10 +61,12 @@ void TumClientServerApp::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         getTrainManager();
 
-        const char *localAddress = par("localAddress");
-        int localPort = par("localPort");
+//        const char *localAddress = par("localAddress");
+//        int localPort = par("localPort");
         socket.setOutputGate(gate("socketOut"));
-        socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+//        socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+        int localUePort = par("localUePort");
+        socket.bind(localUePort);
         socket.listen();
 
         cModule *node = findContainingNode(this);

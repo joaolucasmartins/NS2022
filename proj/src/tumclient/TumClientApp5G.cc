@@ -363,7 +363,7 @@ void TumClientApp5G::socketEstablished(TcpSocket *)
     EV_INFO << "TumClientApp5G::socketEstablished - connected\n";
 
 
-    numRequestsToSend = par("numRequestsPerSession");
+    numRequestsToSend = par("numRequests");
     if (numRequestsToSend < 1)
         numRequestsToSend = 1;
 
