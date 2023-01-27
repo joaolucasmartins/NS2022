@@ -22,7 +22,7 @@
 #include <omnetpp.h>
 
 #include "../TrainManager.h"
-
+#include <iostream>
 using namespace inet;
 using namespace omnetpp;
 
@@ -51,6 +51,8 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     void filterPackets(map<int, vector<TrainInfo>> &trackInfo);
 
   public:
+    ~TumClientServerApp() { std::cout << "Assassinaram-me..." << std::endl; }
+
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);
 

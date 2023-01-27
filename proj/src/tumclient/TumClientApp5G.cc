@@ -285,7 +285,7 @@ void TumClientApp5G::handleAckStopMETumClientApp(cMessage *msg)
 //-------------------------- TCP Part -----------------------
 void TumClientApp5G::connect()
 {
-    std::cout << "CONNECT" << endl;
+    std::cout << "CONNECT" << std::endl;
     // we need a new connId if this is not the first connection
      appSocket.renewSocket();
 
@@ -316,7 +316,8 @@ void TumClientApp5G::connect()
 
 void TumClientApp5G::close()
 {
-    EV_INFO << "issuing CLOSE command\n";
+    EV_INFO << "TumClientApp5G::close - issuing CLOSE command\n";
+    std::cout << "CLOSING SOCKET" << std::endl;
     socket.close();
     emit(connectSignal, -1L);
 }
@@ -324,10 +325,9 @@ void TumClientApp5G::close()
 
 void TumClientApp5G::sendRequest()
 {
-    std::cout << "SEND" << "_" << endl;
     const auto &payload = makeShared<ClientPacket>();
     this->timestampReq = simTime();
-    std::cout << "Req" << std::endl;
+    std::cout << "Req " << numRequestsToSend << std::endl;
     Packet *packet = new Packet("data");
     payload->setTracks(this->tracksToRequest);
     payload->setChunkLength(B(1));
@@ -362,10 +362,11 @@ void TumClientApp5G::socketEstablished(TcpSocket *)
     // *redefine* to perform or schedule first sending
     EV_INFO << "TumClientApp5G::socketEstablished - connected\n";
 
-
     numRequestsToSend = par("numRequests");
     if (numRequestsToSend < 1)
         numRequestsToSend = 1;
+
+    std::cout << "Established: " << numRequestsToSend << std::endl;
 
     rescheduleAfter(0, selfSend_);
 }
@@ -385,7 +386,7 @@ void TumClientApp5G::socketDataArrived(TcpSocket *, Packet *msg, bool)
 
     if (numRequestsToSend > 0)
     {
-        EV_INFO << "TumClientApp5G::sendRequest - reply arrived\n";
+        EV_INFO << "TumClientApp5G::socketDataArrived - reply arrived\n";
         --numRequestsToSend;
 
          simtime_t d = par("thinkTime");
@@ -393,7 +394,7 @@ void TumClientApp5G::socketDataArrived(TcpSocket *, Packet *msg, bool)
     }
     else
     {
-        EV_INFO << "TumClientApp5G::sendRequest - reply to last request arrived\n";
+        EV_INFO << "TumClientApp5G::socketDataArrived - reply to last request arrived\n";
         close();
         scheduleAfter(0, selfStop_);
         cancelEvent(selfSend_);
@@ -416,6 +417,8 @@ void TumClientApp5G::socketClosed(TcpSocket *)
 {
     // *redefine* to start another session etc.
     EV_INFO << "TumClientApp5G::socketClosed - connection closed\n";
+
+    std::cout << "Socket closed" << std::endl;
 
     // start another session after a delay
     simtime_t d = par("idleInterval");
