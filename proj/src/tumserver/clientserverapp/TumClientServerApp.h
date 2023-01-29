@@ -48,6 +48,7 @@ class TumClientServerApp : public cSimpleModule, public LifecycleUnsupported
     std::map<int, ChunkQueue> socketQueue;
 
     void filterPackets(map<int, vector<TrainInfo>> &trackInfo);
+    TrainManager* trainManager;
 
   public:
     TrainManager* getTrainManager();

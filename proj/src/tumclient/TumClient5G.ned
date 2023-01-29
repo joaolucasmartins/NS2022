@@ -13,13 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package tum.tumtrain;
+package tum.tumclient;
 
 import simu5g.nodes.NR.NRUe;
 
-module TumTrain5G extends NRUe
+module TumClient5G extends NRUe
 {
-    parameters:
-	    int trainId = default(-1); // unique train identifier (-1: uses parent index)
-	    int trackId = default(2);
 }

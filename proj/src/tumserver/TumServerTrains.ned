@@ -17,7 +17,7 @@ package tum.tumserver;
 
 import inet.node.inet.StandardHost;
 
-module TumServer extends StandardHost {
+module TumServerTrains extends StandardHost {
     submodules:
         trainManager: TrainManager;
 }
