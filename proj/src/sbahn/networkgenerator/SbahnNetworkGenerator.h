@@ -20,6 +20,9 @@
 
 #include <string>
 #include <map>
+#include <vector>
+
+#include <inet/common/geometry/common/Coord.h>
 
 using namespace omnetpp;
 
@@ -28,10 +31,24 @@ using namespace omnetpp;
  */
 class SbahnNetworkGenerator : public cSimpleModule
 {
+public:
+    class Station {
+    public:
+        double xPos, yPos;
+        int id;
+        std::string name;
+        Station(int id, double xPos, double yPos, std::string name=""): id(id), xPos(xPos), yPos(yPos), name(name) {};
+    };
+
+    inet::Coord getStationOutskirtsPos(Station *s, double minRadius=0, double maxRadius=200);
+    inet::Coord getStationOutskirtsPos(double minRadius=0, double maxRadius=200);
 private:
     std::map<int, double> stopsX;
     std::map<int, double> stopsY;
     cGroupFigure *fGroup;
+
+    std::vector<SbahnNetworkGenerator::Station> stations;
+    double maxX, maxY;
 
     void parseFile(bool addFigs);
     void addStop(int id, int degree, int lat, int lon, const std::string &name);

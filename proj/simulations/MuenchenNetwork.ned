@@ -59,7 +59,6 @@ network MuenchenNetwork
         sbahnNetworkGenerator: SbahnNetworkGenerator {
             @display("p=100,800;is=s;i=block/wheelbarrow");
             filename = "sbahn/muenchen_sbahn.txt";
-            disable = false;
         }
 		carrierAggregation: CarrierAggregation {
             @display("p=100,900;is=s;");

@@ -17,6 +17,10 @@
 
 #include <fstream>
 #include <sstream>
+#include <random>
+#include <math.h>
+
+#include <iostream>
 
 Define_Module(SbahnNetworkGenerator);
 
@@ -31,46 +35,53 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
     if (in.fail())
         throw cRuntimeError("Cannot open file '%s'", filename.c_str());
 
-    int maxY, maxX, nNodes, nEdges;
+    int nNodes, nEdges;
     in >> maxY >> maxX >> nNodes;
 
     cDisplayString &dp = getParentModule()->getDisplayString();
     dp.setTagArg("bgb", 0, maxY);
     dp.setTagArg("bgb", 1, maxX);
 
-    if (!addFigs)
-        return;
+    if (addFigs) {
+        fGroup = new cGroupFigure("networkMap");
+        getParentModule()->getCanvas()->addFigure(fGroup);
+        fGroup->lowerToBottom();
 
-    fGroup = new cGroupFigure("networkMap");
-    getParentModule()->getCanvas()->addFigure(fGroup);
-    fGroup->lowerToBottom();
+        bool renderHandover = par("handoverLine");
+        if (renderHandover) {
+            cLineFigure *line = new cLineFigure("handover-line");
+            line->setStart(cFigure::Point(maxX,0));
+            line->setEnd(cFigure::Point(0,maxY));
+            line->setLineWidth(2);
+            line->setEndArrowhead(cFigure::ARROW_NONE);
+            fGroup->addFigure(line);
+        }
 
-    cLineFigure *line = new cLineFigure("handover-line");
-    line->setStart(cFigure::Point(maxX,0));
-    line->setEnd(cFigure::Point(0,maxY));
-    line->setLineWidth(2);
-    line->setEndArrowhead(cFigure::ARROW_NONE);
-    fGroup->addFigure(line);
-
-    cGroupFigure *connGroup = new cGroupFigure("connections");
-    fGroup->addFigure(connGroup);
+        cGroupFigure *connGroup = new cGroupFigure("connections");
+        fGroup->addFigure(connGroup);
+    }
 
     for (int i=0; i<nNodes; ++i) {
         int id, degree, lat, lon;
         std::string name;
 
-        in >> id >> degree >> lat >> lon;
+        in >> id >> degree >> lon >> lat;
         std::getline(in, name);
 
-        addStop(id, degree, lon, lat, name);
+        stations.push_back(SbahnNetworkGenerator::Station(id, lon, lat, name));
+
+        if (addFigs)
+            addStop(id, degree, lon, lat, name);
     }
 
     in >> nEdges;
-    for (int i=0; i<nEdges; ++i) {
+    for (int i=0; i<nEdges; ++i)
+{
         int a, b, routes;
         in >> a >> b >> routes;
 
-        addConnection(a, b, routes);
+         if (addFigs)
+             addConnection(a, b, routes);
     }
 
     stopsX.clear();
@@ -78,7 +89,7 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
 }
 
 
-void SbahnNetworkGenerator::addStop(int id, int degree, int lat, int lon, const std::string &name) {
+void SbahnNetworkGenerator::addStop(int id, int degree, int lon, int lat, const std::string &name) {
     cFigure::Point p((double) lon, (double) lat);
 
     auto *icon = new cIconFigure((std::to_string(id)+ "_icon").c_str());
@@ -112,3 +123,33 @@ void SbahnNetworkGenerator::addConnection(int a, int b, int routes) {
     line->setLineStyle(cFigure::LineStyle::LINE_DOTTED);
     fGroup->getFigure("connections")->addFigure(line);
 }
+
+
+inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(double minRadius, double maxRadius) {
+    return getStationOutskirtsPos(nullptr, minRadius, maxRadius);
+}
+
+inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(Station *s, double minRadius, double maxRadius) {
+    int idx = std::rand() % stations.size();
+    Station target = stations.at(idx);
+    if (s != nullptr)
+        s = &target;
+
+    double radius = uniform(minRadius, maxRadius);
+    double theta = uniform(0, M_2_PI);
+
+    double xPos = target.xPos + radius * std::cos(theta);
+    double yPos = target.yPos + radius * std::sin(theta);
+
+    xPos = xPos > 0 ? xPos : 0;
+    xPos = xPos < maxX ? xPos : maxX;
+
+    yPos = yPos > 0 ? yPos : 0;
+    yPos = yPos < maxY ? yPos : maxY;
+
+    std::cout << "Center x: " << target.xPos << " y: " << target.yPos << "name: " << target.name << std::endl;
+    std::cout << "Radius: " << radius << " " << " x: " << xPos << " y: " << yPos << std::endl << std::endl;
+
+    return inet::Coord(xPos, yPos, 0);
+}
+
