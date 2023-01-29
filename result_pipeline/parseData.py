@@ -133,7 +133,7 @@ def generatePlots(sca_df, vec_df, config_name):
         pass
 
     try:
-        mkdir(path.join("plots", configname))
+        mkdir(path.join("plots", config_name))
     except OSError as _:
         pass
     # Set filters
@@ -194,8 +194,8 @@ def generatePlots(sca_df, vec_df, config_name):
         #("clientEndToEndDelay", sca_df[clientEndToEndDelay(sca_df)])
     ]
 
-    for text, NBins, data, unit in linePlots:
-        plotLine(text, NBins, data, unit, config_name)
+    #for text, NBins, data, unit in linePlots:
+    #    plotLine(text, NBins, data, unit, config_name)
 
     for text, data in histPlots:
         drawHist(text, data, config_name)
@@ -252,18 +252,20 @@ def plotLine(text_info, N, data, unit, config_name, legend_from_modules=True, le
 def drawHist(text_info, data, config_name):
     # Get merged data into np array
     values = np.concatenate(data.vecvalue.to_numpy())
+    values.sort()
+
+    q25, q75 = np.percentile(values, [25, 75])
+    bin_width = 2 * (q75 - q25) * len(values) ** (-1/3)
+    bins = round((values.max() - values.min()) / bin_width)
+
     if np.unique(values).size > 1:
         kde = True
     else:
         kde = False
 
     title, x_text, y_text = text_info
-    df = pd.DataFrame(values).melt(var_name='column', value_name='data')
-    sns.displot(data=df,
-        x="data",
-        col="column",
-        kde=kde
-    ).set(title=title, xlabel=x_text, ylabel=y_text)
+    print(values)
+    sns.displot(values, bins=7)
 
     plt.savefig(path.join("plots", config_name, config_name + "_" + title),
         bbox_inches='tight', dpi=400)
