@@ -54,4 +54,4 @@ proj/simulations/mobility/
 
 # Makefiles
 proj/Makefile
-config.mk
+myconfig.mk

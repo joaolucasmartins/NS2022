@@ -7,12 +7,12 @@
 
 package tum.mobility.client;
 
-import inet.mobility.base.MobilityBase;
+import inet.mobility.base.MovingMobilityBase;
 
 //
 // This mobility module does nothing; it can be used for stationary nodes.
 //
-simple TumStationaryMobility extends MobilityBase
+simple TumTargetedMobility extends MovingMobilityBase
 {
     parameters:
         double initialX @unit(m) = default(uniform(this.constraintAreaMinX, this.constraintAreaMaxX));
@@ -26,8 +26,6 @@ simple TumStationaryMobility extends MobilityBase
         double initialBank @unit(deg) = default(0deg);
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         bool updateFromDisplayString = default(true); // enables continuous update from the subject module's display string for dragging and rotating it
-        @class(TumStationaryMobility);
-        
-        double updateInterval @unit(s) = default(0.1s);
+        @class(TumTargetedMobility);
 }
 

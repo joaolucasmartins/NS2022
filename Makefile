@@ -4,19 +4,25 @@ include config.mk
 
 CONFIGURATIONS := Default NonFrequentUpdates Scalability
 
-OMNET_FLAGS = -n .:../src:${INET}/src:${SIMU5G}/src \
+OMNET_FLAGS := -n .:../src:${INET}/src:${SIMU5G}/src \
 		-l ${INET}/src/INET \
 		-l ${SIMU5G}/src/simu5g \
-		-u Cmdenv \
 		-r 0 \
 		-s \
 		-f omnetpp.ini
+
+OMNET_CMD_FLAGS := ${OMNET_FLAGS} -u Cmdenv
+
+OMNET_QT_FLAGS := ${OMNET_FLAGS} -u Qtenv \
+		-i ../images \
+		-i ${INET}/images \
+		-i ${SIMU5G}/images \
 
 all: mobility_configs
 
 
 # ---------- COMPILING ----------
-.PHONY: libs simulations
+.PHONY: libs simulations qt
 ${INET}/src/libINET.so:
 	cd ${INET} && make
 
@@ -35,14 +41,17 @@ proj/tum: libs
 
 simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability
 
+qt: proj/tum mobility_configs
+	cd proj/simulations && ../tum -c Default ${OMNET_QT_FLAGS}
+
 proj/simulations/Default: proj/tum mobility_configs
-	cd proj/simulations && ../tum -c Default ${OMNET_FLAGS}
+	cd proj/simulations && ../tum -c Default ${OMNET_CMD_FLAGS}
 
 proj/simulations/NonFrequentUpdates: proj/tum mobility_configs
-	cd proj/simulations && ../tum -c NonFrequentUpdates ${OMNET_FLAGS}
+	cd proj/simulations && ../tum -c NonFrequentUpdates ${OMNET_CMD_FLAGS}
 
 proj/simulations/Scalability: proj/tum mobility_configs
-	cd proj/simulations && ../tum -c Scalability ${OMNET_FLAGS}
+	cd proj/simulations && ../tum -c Scalability ${OMNET_CMD_FLAGS}
 
 
 # ---------- RESULT COLLECTINO & PLOTTING ----------

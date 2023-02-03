@@ -10,6 +10,8 @@
 
 #include <inet/mobility/base/StationaryMobilityBase.h>
 
+#include "TumStationaryMobility.h"
+#include "TumBaseMobility.h"
 #include "../../sbahn/networkgenerator/SbahnNetworkGenerator.h"
 
 /**
@@ -17,7 +19,7 @@
  *
  * @ingroup mobility
  */
-class TumStationaryMobility : public inet::StationaryMobilityBase
+class TumStationaryMobility : public inet::StationaryMobilityBase, TumBaseMobility
 {
   protected:
     double radius;
@@ -26,6 +28,10 @@ class TumStationaryMobility : public inet::StationaryMobilityBase
   protected:
     virtual void initialize(int stage) override;
     virtual inet::Coord getRandomPosition() override;
+
+  public:
+    virtual void onStartCommunication() override;
+    virtual void onEndCommunication() override;
 };
 
 

@@ -37,6 +37,7 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
 
     int nNodes, nEdges;
     in >> maxY >> maxX >> nNodes;
+    stations.reserve(nNodes);
 
     cDisplayString &dp = getParentModule()->getDisplayString();
     dp.setTagArg("bgb", 0, maxY);
@@ -126,20 +127,21 @@ void SbahnNetworkGenerator::addConnection(int a, int b, int routes) {
 
 
 inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(double minRadius, double maxRadius) {
-    return getStationOutskirtsPos(nullptr, minRadius, maxRadius);
+    Station target = getRandomStation();
+    return getStationOutskirtsPos(&target, minRadius, maxRadius);
 }
 
-inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(Station *s, double minRadius, double maxRadius) {
+SbahnNetworkGenerator::Station SbahnNetworkGenerator::getRandomStation() {
     int idx = std::rand() % stations.size();
-    Station target = stations.at(idx);
-    if (s != nullptr)
-        s = &target;
+    return stations.at(idx);
+}
 
+inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(const Station *target, double minRadius, double maxRadius) {
     double radius = uniform(minRadius, maxRadius);
     double theta = uniform(0, M_2_PI);
 
-    double xPos = target.xPos + radius * std::cos(theta);
-    double yPos = target.yPos + radius * std::sin(theta);
+    double xPos = target->xPos + radius * std::cos(theta);
+    double yPos = target->yPos + radius * std::sin(theta);
 
     xPos = xPos > 0 ? xPos : 0;
     xPos = xPos < maxX ? xPos : maxX;
@@ -147,8 +149,8 @@ inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(Station *s, double min
     yPos = yPos > 0 ? yPos : 0;
     yPos = yPos < maxY ? yPos : maxY;
 
-    std::cout << "Center x: " << target.xPos << " y: " << target.yPos << "name: " << target.name << std::endl;
-    std::cout << "Radius: " << radius << " " << " x: " << xPos << " y: " << yPos << std::endl << std::endl;
+//    std::cout << "Center x: " << target->xPos << " y: " << target->yPos << "name: " << target->name << std::endl;
+//    std::cout << "Radius: " << radius << " " << " x: " << xPos << " y: " << yPos << std::endl << std::endl;
 
     return inet::Coord(xPos, yPos, 0);
 }

@@ -38,10 +38,12 @@ public:
         int id;
         std::string name;
         Station(int id, double xPos, double yPos, std::string name=""): id(id), xPos(xPos), yPos(yPos), name(name) {};
+        Station(): id(-1), xPos(0), yPos(0), name("") {};
     };
 
-    inet::Coord getStationOutskirtsPos(Station *s, double minRadius=0, double maxRadius=200);
+    inet::Coord getStationOutskirtsPos(const Station *s, double minRadius=0, double maxRadius=200);
     inet::Coord getStationOutskirtsPos(double minRadius=0, double maxRadius=200);
+    Station getRandomStation();
 private:
     std::map<int, double> stopsX;
     std::map<int, double> stopsY;
