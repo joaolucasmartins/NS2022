@@ -154,6 +154,8 @@ inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(const Station *target,
 //    std::cout << "Center x: " << target->xPos << " y: " << target->yPos << "name: " << target->name << std::endl;
 //    std::cout << "Radius: " << radius << " " << " x: " << xPos << " y: " << yPos << std::endl << std::endl;
 
+    std::cout << target->name << " " << target->xPos << ":" << target->yPos << " -> " << xPos << ":" << yPos << std::endl;
+
     return inet::Coord(xPos, yPos, 0);
 }
 

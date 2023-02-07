@@ -138,7 +138,7 @@ void TumClientApp::handleTimer(cMessage *msg)
             if (mobilityGate != nullptr)
                 sendDirect(new cMessage("START"), mobilityGate);
 
-            rescheduleAfterOrDeleteTimer(0, MSGKIND_CONNECT);
+            rescheduleAfterOrDeleteTimer(SimTime(1, SimTimeUnit::SIMTIME_S), MSGKIND_CONNECT);
 
             break;
 
