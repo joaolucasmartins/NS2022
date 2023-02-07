@@ -27,7 +27,7 @@ simple TumTargetedMobility extends MovingMobilityBase
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         bool updateFromDisplayString = default(true); // enables continuous update from the subject module's display string for dragging and rotating it
         
-        double speed @unit(mps) = default(50mps); // speed of the host
+        double speed @unit(mps) = default(10mps); // speed of the host
         @class(TumTargetedMobility);
 	gates:
 	    input direct @directIn;

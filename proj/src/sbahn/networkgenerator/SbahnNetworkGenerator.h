@@ -19,7 +19,6 @@
 #include <omnetpp.h>
 
 #include <string>
-#include <map>
 #include <vector>
 
 #include <inet/common/geometry/common/Coord.h>

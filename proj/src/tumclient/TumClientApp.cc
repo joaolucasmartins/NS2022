@@ -26,9 +26,10 @@
 
 #include <iostream>
 
-#define MSGKIND_CONNECT    0
-#define MSGKIND_SEND       1
-#define MSGKIND_PRECONNECT    2
+#define MSGKIND_CONNECT         0
+#define MSGKIND_SEND            1
+#define MSGKIND_PRECONNECT      2
+#define MSGKIND_FINISHSESSION   3
 
 Define_Module(TumClientApp);
 
@@ -138,7 +139,7 @@ void TumClientApp::handleTimer(cMessage *msg)
             if (mobilityGate != nullptr)
                 sendDirect(new cMessage("START"), mobilityGate);
 
-            rescheduleAfterOrDeleteTimer(SimTime(1, SimTimeUnit::SIMTIME_S), MSGKIND_CONNECT);
+            rescheduleAfterOrDeleteTimer(SimTime(500, SimTimeUnit::SIMTIME_MS), MSGKIND_CONNECT);
 
             break;
 
@@ -163,6 +164,24 @@ void TumClientApp::handleTimer(cMessage *msg)
             numRequestsToSend--;
             // no scheduleAt(): next request will be sent when reply to this one
             // arrives (see socketDataArrived())
+            break;
+
+        case MSGKIND_FINISHSESSION:
+
+            std::cout << "[APP] Finish Session" << std::endl;
+
+            if (mobilityGate != nullptr)
+                    sendDirect(new cMessage("END"), mobilityGate);
+
+            // start another session after a delay
+            if (timeoutMsg) {
+                simtime_t d = par("idleInterval");
+
+                rescheduleAfterOrDeleteTimer(d, MSGKIND_PRECONNECT);
+            } else {
+                cRuntimeError("TumClientApp: timeoutMsg must always be defined");
+            }
+
             break;
 
         default:
@@ -237,25 +256,17 @@ void TumClientApp::socketClosed(TcpSocket *socket)
 
     std::cout << "[APP] Socket closed" << endl;
 
-    if (mobilityGate != nullptr)
-        sendDirect(new cMessage("END"), mobilityGate);
-
     if (hasGUI())
         getParentModule()->getDisplayString().setTagArg("i2", 0, "status/hourglass");
 
-    // start another session after a delay
-    if (timeoutMsg) {
-        simtime_t d = par("idleInterval");
-
-        rescheduleAfterOrDeleteTimer(d, MSGKIND_PRECONNECT);
-    } else {
-        cRuntimeError("TumClientApp: timeoutMsg must always be defined");
-    }
+    rescheduleAfterOrDeleteTimer(SimTime(500, SimTimeUnit::SIMTIME_MS), MSGKIND_FINISHSESSION);
 }
 
 void TumClientApp::socketFailure(TcpSocket *socket, int code)
 {
     TcpAppBase::socketFailure(socket, code);
+
+    cRuntimeError("[TumClientApp] Please don't fail");
 
     // reconnect after a delay
     if (timeoutMsg) {

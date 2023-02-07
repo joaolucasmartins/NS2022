@@ -19,7 +19,11 @@ public:
 
     Station(int id, double xPos, double yPos, std::string name): id(id), xPos(xPos), yPos(yPos), name(name) {};
     Station(): id(-1), xPos(0), yPos(0), name("") {};
+    Station(int id): id(id), xPos(0), yPos(0), name("") {};
+
     inet::Coord getCoord() { return inet::Coord(xPos, yPos, 0); }
+
+    bool operator==(const Station& rhs) const { return this->id == rhs.id; }
 };
 
 #endif /* SRC_SBAHN_STATION_H_ */

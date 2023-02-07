@@ -17,8 +17,8 @@
 
 #include <fstream>
 #include <sstream>
-#include <random>
 #include <math.h>
+#include <algorithm>
 
 #include <iostream>
 
@@ -86,9 +86,6 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
          if (addFigs)
              addConnection(a, b, routes);
     }
-
-    stopsX.clear();
-    stopsY.clear();
 }
 
 
@@ -100,9 +97,6 @@ void SbahnNetworkGenerator::addStop(int id, int degree, int lon, int lat, const 
     icon->setSize(16, 16);
     icon->setPosition(p);
     fGroup->addFigure(icon);
-
-    stopsX[id] = p.x;
-    stopsY[id] = p.y;
 
     p.y += 18; // TODO: Calculate offset from maxsize
 
@@ -117,9 +111,15 @@ void SbahnNetworkGenerator::addStop(int id, int degree, int lon, int lat, const 
 }
 
 void SbahnNetworkGenerator::addConnection(int a, int b, int routes) {
+    auto sa = std::find(stations.begin(), stations.end(), Station(a));
+    auto sb = std::find(stations.begin(), stations.end(), Station(b));
+
+    if (sa == stations.end() || sb == stations.end())
+        cRuntimeError("[SbahnNetworkGenerator] Connection between non-existant Station(s) not found");
+
     cLineFigure *line = new cLineFigure("line");
-    line->setStart(cFigure::Point(stopsX[a], stopsY[a]));
-    line->setEnd(cFigure::Point(stopsX[b], stopsY[b]));
+    line->setStart(cFigure::Point(sa->xPos, sa->yPos));
+    line->setEnd(cFigure::Point(sb->xPos, sb->yPos));
     line->setLineWidth(2);
     line->setLineOpacity(0.5);
     line->setLineColor(cFigure::Color("#008D4F"));
