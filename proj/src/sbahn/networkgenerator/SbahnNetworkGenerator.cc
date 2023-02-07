@@ -37,6 +37,7 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
 
     int nNodes, nEdges;
     in >> maxY >> maxX >> nNodes;
+    stations = std::vector<Station>();
     stations.reserve(nNodes);
 
     cDisplayString &dp = getParentModule()->getDisplayString();
@@ -67,9 +68,10 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
         std::string name;
 
         in >> id >> degree >> lon >> lat;
+        in.get(); // Consume extra space
         std::getline(in, name);
 
-        stations.push_back(SbahnNetworkGenerator::Station(id, lon, lat, name));
+        stations.emplace_back(id, lon, lat, name);
 
         if (addFigs)
             addStop(id, degree, lon, lat, name);
@@ -131,8 +133,8 @@ inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(double minRadius, doub
     return getStationOutskirtsPos(&target, minRadius, maxRadius);
 }
 
-SbahnNetworkGenerator::Station SbahnNetworkGenerator::getRandomStation() {
-    int idx = std::rand() % stations.size();
+Station SbahnNetworkGenerator::getRandomStation() {
+    int idx = intuniform(0, stations.size());
     return stations.at(idx);
 }
 

@@ -7,6 +7,8 @@
 
 #include "TumStationaryMobility.h"
 
+#include "../../tumclient/TumClientApp.h"
+
 Define_Module(TumStationaryMobility);
 
 void TumStationaryMobility::initialize(int stage) {
@@ -20,16 +22,5 @@ void TumStationaryMobility::initialize(int stage) {
 
 inet::Coord TumStationaryMobility::getRandomPosition() {
     return sg->getStationOutskirtsPos();
-}
-
-
-void TumStationaryMobility::onStartCommunication() {
-    initializePosition();
-
-    getDisplayString().setTagArg("i", 1, "purple");
-}
-
-void TumStationaryMobility::onEndCommunication() {
-    getDisplayString().setTagArg("i", 1, "");
 }
 

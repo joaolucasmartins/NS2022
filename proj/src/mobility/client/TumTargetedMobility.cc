@@ -7,79 +7,95 @@
 
 #include "TumTargetedMobility.h"
 
+
+#include "../../tumclient/TumClientApp.h"
+
+#include <iostream>
+
+using namespace omnetpp;
+
 Define_Module(TumTargetedMobility);
 
-TumTargetedMobility::TumTargetedMobility()
+TumTargetedMobility::TumTargetedMobility(): MovingMobilityBase()
 {
-
-}
-
-void TumTargetedMobility::computeMaxSpeed()
-{
-//    const BonnMotionFile::Line& vec = *lines;
-//    double lastTime = vec[0];
-//    Coord lastPos(vec[1], vec[2], (is3D ? vec[3] : 0));
-//    unsigned int step = (is3D ? 4 : 3);
-//    for (unsigned int i = step; i < vec.size(); i += step) {
-//        double elapsedTime = vec[i] - lastTime;
-//        Coord currPos(vec[i + 1], vec[i + 2], (is3D ? vec[i + 3] : 0));
-//        double distance = currPos.distance(lastPos);
-//        double speed = distance / elapsedTime;
-//        if (speed > maxSpeed)
-//            maxSpeed = speed;
-//        lastPos.x = currPos.x;
-//        lastPos.y = currPos.y;
-//        lastPos.z = currPos.z;
-//        lastTime = vec[i];
-//    }
+    targetPosition = restCoords;
+    lastPosition = restCoords;
+    stationary = true;
 }
 
 void TumTargetedMobility::initialize(int stage)
 {
-    LineSegmentsMobilityBase::initialize(stage);
+    MovingMobilityBase::initialize(stage);
 
     if (stage == inet::INITSTAGE_LOCAL) {
-        nextChange = -1;
-    } else if (stage == inet::INITSTAGE_SINGLE_MOBILITY) {
-
+        sg = static_cast<SbahnNetworkGenerator*>(getModuleByPath("sbahnNetworkGenerator"));
     }
 }
 
 void TumTargetedMobility::setInitialPosition()
 {
-//    const BonnMotionFile::Line& vec = *lines;
-//    if (lines->size() >= 3) {
-//        lastPosition.x = vec[1];
-//        lastPosition.y = vec[2];
-//    }
+    if (stationary) {
+        targetPosition = restCoords;
+        lastPosition = restCoords;
+        nextChange = -1;
+        if (hasGUI())
+            getParentModule()->getDisplayString().setTagArg("t", 0, "");
+    } else {
+        target = sg->getRandomStation();
+        lastPosition = sg->getStationOutskirtsPos(&target);
+        targetPosition = target.getCoord();
+        if (hasGUI())
+            getParentModule()->getDisplayString().setTagArg("t", 0, target.name.c_str());
+    }
 }
 
-void TumTargetedMobility::setTargetPosition()
+void TumTargetedMobility::initializePosition()
 {
-//    const BonnMotionFile::Line& vec = *lines;
-//    if (currentLine + (is3D ? 3 : 2) >= (int)vec.size()) {
-//        nextChange = -1;
-//        stationary = true;
-//        targetPosition = lastPosition;
-//        return;
-//    }
-//    nextChange = vec[currentLine];
-//    targetPosition.x = vec[currentLine + 1];
-//    targetPosition.y = vec[currentLine + 2];
-//    targetPosition.z = is3D ? vec[currentLine + 3] : 0;
-//    currentLine += (is3D ? 4 : 3);
+    MovingMobilityBase::initializePosition(); // Internally calls setInitialPosition()
+    if (!stationary) {
+        lastVelocity = (targetPosition - lastPosition) * speed;
+
+        EV_INFO << "new trajectory from position = " << targetPosition << " to station " << target.id << endl;
+    } else  {
+        lastVelocity = inet::Coord::ZERO;
+    }
+    lastUpdate = simTime();
+    scheduleUpdate();
 }
 
-void TumTargetedMobility::onStartCommunication() {
-    target = sg->getRandomStation();
-    origin = sg->getStationOutskirtsPos(&target);
+void TumTargetedMobility::handleMessage(cMessage *message)
+{
+    if (message->isSelfMessage())
+        handleSelfMessage(message);
+    else {
+        std::cout << "[MOB] Got message: " << message->getName() << std::endl;
+        if (!strcmp(message->getName(), "START")) {
+            std::cout << "[MOB] START" << std::endl;
+            stationary = false;
+            initializePosition();
+        } else if (!strcmp(message->getName(), "END")) {
+            std::cout << "[MOB] END" << std::endl;
+            stationary = true;
+            initializePosition();
+        } else
+            std::cout << "UNKNOWN MESSAGE" << std::endl;
 
-    initializeOrientation();
-    initializePosition();
+        delete message;
+    }
 }
 
-void TumTargetedMobility::onEndCommunication() {
 
+void TumTargetedMobility::move()
+{
+    simtime_t now = simTime();
+    if (!stationary) {
+        double elapsedTime = (now - lastUpdate).dbl();
+        lastPosition += lastVelocity * elapsedTime;
+
+        if (lastPosition.distance(targetPosition) <= 50) {
+            stationary = true;
+        }
+    }
 }
 
 

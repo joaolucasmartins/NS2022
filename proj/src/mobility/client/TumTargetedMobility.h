@@ -8,24 +8,27 @@
 #ifndef __TRAINULTRAPRECISEMONITORING_TUMTARGETEDMOBILITY_H
 #define __TRAINULTRAPRECISEMONITORING_TUMTARGETEDMOBILITY_H
 
-#include <inet/mobility/base/LineSegmentsMobilityBase.h>
-
-#include "TumBaseMobility.h"
+#include "inet/mobility/base/MovingMobilityBase.h"
+#include "../ResettableMobilityBase.h"
 #include "../../sbahn/networkgenerator/SbahnNetworkGenerator.h"
+#include "../../sbahn/Station.h"
 
 /**
  * This mobility module does not move at all; it can be used for standalone stationary nodes.
  *
  * @ingroup mobility
  */
-class TumTargetedMobility : public inet::LineSegmentsMobilityBase, TumBaseMobility
+class TumTargetedMobility : public inet::MovingMobilityBase
 {
 protected:
   SbahnNetworkGenerator *sg;
 
+  const inet::Coord restCoords = inet::Coord(500, 100);
+  double speed;
+
   // state
-  SbahnNetworkGenerator::Station target;
-  inet::Coord origin;
+  Station target;
+  inet::Coord targetPosition;
 
 protected:
 
@@ -35,16 +38,15 @@ protected:
   /** @brief Initializes the position according to the mobility model. */
   virtual void setInitialPosition() override;
 
-  /** @brief Overridden from LineSegmentsMobilityBase. */
-  virtual void setTargetPosition() override;
+  virtual void initializePosition() override;
 
-  virtual void computeMaxSpeed();
+  virtual void move() override;
+
+  virtual void handleMessage(omnetpp::cMessage *message) override;
 
 public:
   TumTargetedMobility();
 
-  virtual void onStartCommunication() override;
-  virtual void onEndCommunication() override;
 };
 
 
