@@ -57,13 +57,6 @@ void TrainBonnMotionMobility::handleSelfMessage(cMessage *message)
 }
 
 
-const Coord& TrainBonnMotionMobility::getCurrentPosition()
-{
-    moveAndUpdate(); // -> Updating will cause a crash with the follow mobility
-//    std::cout << "Ay lmayo" << std::endl;
-    return lastPosition;
-}
-
 
 
 

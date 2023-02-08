@@ -35,8 +35,6 @@ class TrainBonnMotionMobility : public inet::BonnMotionMobility
     TrainBonnMotionMobility();
     ~TrainBonnMotionMobility();
 
-    const inet::Coord& getCurrentPosition() override;
-
   protected:
     virtual void initialize(int stage) override;
     void handleSelfMessage(cMessage *message) override;

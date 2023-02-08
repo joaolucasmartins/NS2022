@@ -96,9 +96,9 @@ void TumTargetedMobility::move()
         double elapsedTime = (now - lastUpdate).dbl();
         lastPosition += lastVelocity * elapsedTime;
 
-//        if (lastPosition.distance(targetPosition) <= 10) {
-//            stationary = true;
-//        }
+        if (lastPosition.distance(targetPosition) <= 5) {
+            stationary = true;
+        }
     }
 }
 
