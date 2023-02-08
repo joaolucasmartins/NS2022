@@ -36,13 +36,13 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
         throw cRuntimeError("Cannot open file '%s'", filename.c_str());
 
     int nNodes, nEdges;
-    in >> maxY >> maxX >> nNodes;
+    in >> maxX >> maxY >> nNodes;
     stations = std::vector<Station>();
     stations.reserve(nNodes);
 
     cDisplayString &dp = getParentModule()->getDisplayString();
-    dp.setTagArg("bgb", 0, maxY);
-    dp.setTagArg("bgb", 1, maxX);
+    dp.setTagArg("bgb", 0, maxX);
+    dp.setTagArg("bgb", 1, maxY);
 
     if (addFigs) {
         fGroup = new cGroupFigure("networkMap");
@@ -52,8 +52,8 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
         bool renderHandover = par("handoverLine");
         if (renderHandover) {
             cLineFigure *line = new cLineFigure("handover-line");
-            line->setStart(cFigure::Point(maxX,0));
-            line->setEnd(cFigure::Point(0,maxY));
+            line->setStart(cFigure::Point(maxY, 0));
+            line->setEnd(cFigure::Point(0, maxX));
             line->setLineWidth(2);
             line->setEndArrowhead(cFigure::ARROW_NONE);
             fGroup->addFigure(line);
@@ -135,12 +135,15 @@ inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(double minRadius, doub
 
 Station SbahnNetworkGenerator::getRandomStation() {
     int idx = intuniform(0, stations.size());
+    std::cout << "idx: " << idx << std::endl;
     return stations.at(idx);
 }
 
 inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(const Station *target, double minRadius, double maxRadius) {
     double radius = uniform(minRadius, maxRadius);
     double theta = uniform(0, M_2_PI);
+
+    std::cout << "r: " << radius << " t: " << theta << std::endl;
 
     double xPos = target->xPos + radius * std::cos(theta);
     double yPos = target->yPos + radius * std::sin(theta);

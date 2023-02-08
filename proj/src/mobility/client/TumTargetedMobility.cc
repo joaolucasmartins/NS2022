@@ -29,6 +29,10 @@ void TumTargetedMobility::initialize(int stage)
 
     if (stage == inet::INITSTAGE_LOCAL) {
         sg = static_cast<SbahnNetworkGenerator*>(getModuleByPath("sbahnNetworkGenerator"));
+        speed = par("speed");
+        WATCH(stationary);
+        WATCH(targetPosition);
+        WATCH(lastVelocity);
     }
 }
 
@@ -42,7 +46,7 @@ void TumTargetedMobility::setInitialPosition()
             getParentModule()->getDisplayString().setTagArg("t", 0, "");
     } else {
         target = sg->getRandomStation();
-        lastPosition = sg->getStationOutskirtsPos(&target);
+        lastPosition = sg->getStationOutskirtsPos(&target, 400, 600);
         targetPosition = target.getCoord();
         if (hasGUI())
             getParentModule()->getDisplayString().setTagArg("t", 0, target.name.c_str());
@@ -53,7 +57,9 @@ void TumTargetedMobility::initializePosition()
 {
     MovingMobilityBase::initializePosition(); // Internally calls setInitialPosition()
     if (!stationary) {
-        lastVelocity = (targetPosition - lastPosition) * speed;
+        lastVelocity = (targetPosition - lastPosition).normalize() * speed;
+        std::cout << "[MOB] LastPos: " << lastPosition << " TargetPos: " << targetPosition << std::endl;
+        std::cout << "[MOB] Velocity: " << (targetPosition - lastPosition).normalize() * speed << " with speed " << lastVelocity.length() << " (" << speed << ")" << std::endl;
 
         EV_INFO << "new trajectory from position = " << targetPosition << " to station " << target.id << endl;
     } else  {
@@ -65,8 +71,9 @@ void TumTargetedMobility::initializePosition()
 
 void TumTargetedMobility::handleMessage(cMessage *message)
 {
-    if (message->isSelfMessage())
+    if (message->isSelfMessage()) {
         handleSelfMessage(message);
+    }
     else {
         std::cout << "[MOB] Got message: " << message->getName() << std::endl;
         if (!strcmp(message->getName(), "START")) {
@@ -78,7 +85,7 @@ void TumTargetedMobility::handleMessage(cMessage *message)
             stationary = true;
             initializePosition();
         } else
-            std::cout << "UNKNOWN MESSAGE" << std::endl;
+            throw cRuntimeError("Invalid msg: name='%s' kind=%d", message->getName(), message->getKind());
 
         delete message;
     }
@@ -92,9 +99,9 @@ void TumTargetedMobility::move()
         double elapsedTime = (now - lastUpdate).dbl();
         lastPosition += lastVelocity * elapsedTime;
 
-        if (lastPosition.distance(targetPosition) <= 50) {
-            stationary = true;
-        }
+//        if (lastPosition.distance(targetPosition) <= 10) {
+//            stationary = true;
+//        }
     }
 }
 

@@ -24,6 +24,7 @@ import inet.node.ethernet.Eth10G;
 import inet.node.inet.Router;
 
 import tum.tumclient.TumClient5G;
+import tum.tumclient.TumClient;
 import tum.tumtrain.TumTrain5G;
 import tum.tumserver.TumServerClients;
 import tum.tumserver.TumServerTrains;
@@ -43,7 +44,7 @@ network MuenchenNetwork
     parameters:
         int nClients;
         int nTrains;
-        @display("bgi=maps/muenchen,s;");
+        @display("bgi=maps/muenchen,s;bgb=4339,3678;");
     
     types:
         channel C extends Eth100M {}
@@ -72,48 +73,49 @@ network MuenchenNetwork
 
 
         upf: Upf {
-            @display("p=200,150");
+            @display("p=1400,1200");
         }
         iUpf: Upf {
-            @display("p=150,150");
+            @display("p=1700,1600");
         }
         gnb1: gNodeB {
             parameters:
-                @display("p=500,500;is=l");
+                @display("p=1700,1300;is=l");
         }
         gnb2: gNodeB {
             parameters:
-                @display("p=3839,3178;is=l");
+                @display("p=2500,2500;is=l");
         }
 
 
         client[nClients]: TumClient5G {
             parameters:
-                @display("is=s;i=device/pocketpc");
+                @display("is=s;i=misc/smartphone");
         }
         train[nTrains]: TumTrain5G;
 
         serverTrains: TumServerTrains {
         	parameters:
-        	    @display("p=50,20;i=device/server");
+        	    @display("p=1100,1200;i=device/server");
         }
         serverClients: TumServerClients {
         	parameters:
-        	    @display("p=70,20;i=device/server");
+        	    @display("p=1300,1000;i=device/server");
         }
         clientRouter: Router {
         	parameters:
-        	    @display("p=55,30;i=device/smallrouter");
+        	    @display("p=1300,1100;i=device/smallrouter");
         }
         trainRouter: Router {
         	parameters:
-        	    @display("p=45,30;i=device/smallrouter");
+        	    @display("p=1200,1200;i=device/smallrouter");
         }
         externalRouter: Router {
-            @display("p=45,30;i=device/smallrouter");
+            @display("p=1300,1200;i=device/smallrouter");
         }
             
-    connections:        
+    connections:
+        
         //# Data Network connections
         externalRouter.pppg++ <--> C <--> upf.filterGate;
 

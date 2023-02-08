@@ -24,3 +24,14 @@ inet::Coord TumStationaryMobility::getRandomPosition() {
     return sg->getStationOutskirtsPos();
 }
 
+
+void TumStationaryMobility::handleMessage(cMessage *message)
+{
+    if (message->isSelfMessage()) {
+        std::cout << "[MOB] Self message: " << message->getName() << std::endl;
+        handleSelfMessage(message);
+    }
+    else {
+        std::cout << "[MOB] Got message: " << message->getName() << std::endl;
+    }
+}

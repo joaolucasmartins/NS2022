@@ -27,6 +27,8 @@ class TumStationaryMobility : public inet::StationaryMobilityBase
   protected:
     virtual void initialize(int stage) override;
     virtual inet::Coord getRandomPosition() override;
+
+    virtual void handleMessage(omnetpp::cMessage *message) override;
 };
 
 

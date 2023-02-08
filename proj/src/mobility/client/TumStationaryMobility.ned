@@ -29,5 +29,7 @@ simple TumStationaryMobility extends MobilityBase
         @class(TumStationaryMobility);
         
         double updateInterval @unit(s) = default(0.1s);
+//	gates:
+//	    input direct @directIn;
 }
 

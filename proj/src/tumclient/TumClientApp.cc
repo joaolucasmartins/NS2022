@@ -123,8 +123,8 @@ void TumClientApp::sendRequest()
     sendPacket(packet);
 
     if (hasGUI()) {
-        std::string s = "Session: " + to_string(numRequestsToSend) + "/" + to_string(sessionRequestsToSend);
-        bubble(s.c_str());
+        std::string s = "Session: " + to_string(sessionRequestsToSend - numRequestsToSend) + "/" + to_string(sessionRequestsToSend);
+        getParentModule()->bubble(s.c_str());
     }
 
     std::cout << "[APP] Send request" << std::endl;
@@ -167,7 +167,6 @@ void TumClientApp::handleTimer(cMessage *msg)
             break;
 
         case MSGKIND_FINISHSESSION:
-
             std::cout << "[APP] Finish Session" << std::endl;
 
             if (mobilityGate != nullptr)
