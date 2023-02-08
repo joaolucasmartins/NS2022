@@ -22,5 +22,6 @@ import inet.mobility.single.BonnMotionMobility;
 //
 simple TrainBonnMotionMobility extends BonnMotionMobility
 {
-
+    parameters:
+		@class(TrainBonnMotionMobility);
 }

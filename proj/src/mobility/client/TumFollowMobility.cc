@@ -90,6 +90,7 @@ void TumFollowMobility::move()
 
     if (now == nextChange) {
         stationary = true;
+        nextChange = -1;
     } else if (!stationary) {
         // Copy position of train
         lastPosition = train->getCurrentPosition();

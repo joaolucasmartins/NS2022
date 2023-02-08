@@ -22,7 +22,7 @@ void TumStationaryMobility::initialize(int stage) {
 
 
 inet::Coord TumStationaryMobility::getRandomPosition() {
-    return sg->getStationOutskirtsPos();
+    return sg->getStationOutskirtsPos(100, 500);
 }
 
 
