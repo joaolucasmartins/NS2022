@@ -42,7 +42,7 @@ proj/tum: libs
 simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability
 
 gui: proj/tum mobility_configs
-	cd proj/simulations && ../tum -c Default ${OMNET_QT_FLAGS}
+	cd proj/simulations && ../tum ${OMNET_QT_FLAGS}
 
 proj/simulations/Default: proj/tum mobility_configs
 	cd proj/simulations && ../tum -c Default ${OMNET_CMD_FLAGS}
