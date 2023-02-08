@@ -8,9 +8,8 @@
 #ifndef __TRAINULTRAPRECISEMONITORING_TUMTARGETEDMOBILITY_H
 #define __TRAINULTRAPRECISEMONITORING_TUMTARGETEDMOBILITY_H
 
+#include "../../sbahn/manager/SbahnNetworkManager.h"
 #include "inet/mobility/base/MovingMobilityBase.h"
-#include "../ResettableMobilityBase.h"
-#include "../../sbahn/networkgenerator/SbahnNetworkGenerator.h"
 #include "../../sbahn/Station.h"
 
 /**
@@ -21,9 +20,9 @@
 class TumTargetedMobility : public inet::MovingMobilityBase
 {
 protected:
-  SbahnNetworkGenerator *sg;
+  SbahnNetworkManager *sg;
 
-  const inet::Coord restCoords = inet::Coord(500, 100);
+  const inet::Coord restCoords = inet::Coord(500, 300);
   double speed;
 
   // state

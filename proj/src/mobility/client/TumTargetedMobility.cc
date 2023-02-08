@@ -28,11 +28,12 @@ void TumTargetedMobility::initialize(int stage)
     MovingMobilityBase::initialize(stage);
 
     if (stage == inet::INITSTAGE_LOCAL) {
-        sg = static_cast<SbahnNetworkGenerator*>(getModuleByPath("sbahnNetworkGenerator"));
+        sg = static_cast<SbahnNetworkManager*>(getModuleByPath("sbahnNetworkGenerator"));
         speed = par("speed");
         WATCH(stationary);
         WATCH(targetPosition);
         WATCH(lastVelocity);
+        getParentModule()->getDisplayString().setTagArg("i", 0, "vehicles/bicycle");
     }
 }
 
@@ -58,8 +59,6 @@ void TumTargetedMobility::initializePosition()
     MovingMobilityBase::initializePosition(); // Internally calls setInitialPosition()
     if (!stationary) {
         lastVelocity = (targetPosition - lastPosition).normalize() * speed;
-        std::cout << "[MOB] LastPos: " << lastPosition << " TargetPos: " << targetPosition << std::endl;
-        std::cout << "[MOB] Velocity: " << (targetPosition - lastPosition).normalize() * speed << " with speed " << lastVelocity.length() << " (" << speed << ")" << std::endl;
 
         EV_INFO << "new trajectory from position = " << targetPosition << " to station " << target.id << endl;
     } else  {
@@ -75,13 +74,11 @@ void TumTargetedMobility::handleMessage(cMessage *message)
         handleSelfMessage(message);
     }
     else {
-        std::cout << "[MOB] Got message: " << message->getName() << std::endl;
+//        std::cout << "[MOB] Got message: " << message->getName() << std::endl;
         if (!strcmp(message->getName(), "START")) {
-            std::cout << "[MOB] START" << std::endl;
             stationary = false;
             initializePosition();
         } else if (!strcmp(message->getName(), "END")) {
-            std::cout << "[MOB] END" << std::endl;
             stationary = true;
             initializePosition();
         } else

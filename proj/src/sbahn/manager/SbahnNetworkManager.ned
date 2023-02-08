@@ -13,14 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package tum.sbahn.networkgenerator;
+package tum.sbahn.manager;
 
 //
 // TODO auto-generated module
 //
-simple SbahnNetworkGenerator
+simple SbahnNetworkManager
 {
     parameters:
+        @display("i=block/wheelbarrow");
+
         bool disable = default(false);
         bool handoverLine = default(false);
         string filename;

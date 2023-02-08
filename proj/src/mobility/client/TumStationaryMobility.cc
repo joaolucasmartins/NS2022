@@ -15,7 +15,8 @@ void TumStationaryMobility::initialize(int stage) {
     StationaryMobilityBase::initialize(stage);
 
     if (stage == inet::INITSTAGE_LOCAL) {
-        sg = static_cast<SbahnNetworkGenerator*>(getModuleByPath("sbahnNetworkGenerator"));
+        sg = static_cast<SbahnNetworkManager*>(getModuleByPath("sbahnNetworkGenerator"));
+        getParentModule()->getDisplayString().setTagArg("i", 0, "misc/town");
     }
 }
 
@@ -27,11 +28,6 @@ inet::Coord TumStationaryMobility::getRandomPosition() {
 
 void TumStationaryMobility::handleMessage(cMessage *message)
 {
-    if (message->isSelfMessage()) {
-        std::cout << "[MOB] Self message: " << message->getName() << std::endl;
+    if (message->isSelfMessage())
         handleSelfMessage(message);
-    }
-    else {
-        std::cout << "[MOB] Got message: " << message->getName() << std::endl;
-    }
 }

@@ -24,28 +24,41 @@
 #include <inet/common/geometry/common/Coord.h>
 #include "../Station.h"
 
+
 using namespace omnetpp;
 
 /**
  * TODO - Generated class
  */
-class SbahnNetworkGenerator : public cSimpleModule
+class SbahnNetworkManager : public cSimpleModule
 {
 public:
     inet::Coord getStationOutskirtsPos(const Station *s, double minRadius=0, double maxRadius=200);
     inet::Coord getStationOutskirtsPos(double minRadius=0, double maxRadius=200);
     Station getRandomStation();
+
+    class TrainRep {
+      public:
+        simtime_t stopTime;
+        cModule *train;
+        TrainRep(simtime_t stopTime, cModule *train): stopTime(stopTime), train(train) {};
+    };
+    TrainRep getRandomActiveTrain();
+    void registerTrainStart(cModule *train, simtime_t stopTime);
+    void registerTrainStop(cModule *train);
 private:
-    std::map<int, double> stopsX;
-    std::map<int, double> stopsY;
     cGroupFigure *fGroup;
 
     std::vector<Station> stations;
     double maxX, maxY;
 
+    std::vector<TrainRep> activeTrains;
+
+
     void parseFile(bool addFigs);
     void addStop(int id, int degree, int lat, int lon, const std::string &name);
     void addConnection(int a, int b, int routes);
+
   protected:
     virtual void initialize() override;
 };

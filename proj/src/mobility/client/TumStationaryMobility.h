@@ -11,7 +11,8 @@
 #include <inet/mobility/base/StationaryMobilityBase.h>
 
 #include "TumStationaryMobility.h"
-#include "../../sbahn/networkgenerator/SbahnNetworkGenerator.h"
+
+#include "../../sbahn/manager/SbahnNetworkManager.h"
 
 /**
  * This mobility module does not move at all; it can be used for standalone stationary nodes.
@@ -22,7 +23,7 @@ class TumStationaryMobility : public inet::StationaryMobilityBase
 {
   protected:
     double radius;
-    SbahnNetworkGenerator *sg;
+    SbahnNetworkManager *sg;
 
   protected:
     virtual void initialize(int stage) override;

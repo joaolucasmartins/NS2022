@@ -87,7 +87,7 @@ void TumClientApp::handleStartOperation(LifecycleOperation *operation)
         scheduleAt(start, timeoutMsg);
     }
 
-    std::cout << "[APP] Lifecycle start" << std::endl;
+    // std::cout << "[APP] Lifecycle start" << std::endl;
 }
 
 void TumClientApp::handleStopOperation(LifecycleOperation *operation)
@@ -96,7 +96,7 @@ void TumClientApp::handleStopOperation(LifecycleOperation *operation)
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
 
-    std::cout << "[APP] Lifecycle stop" << std::endl;
+    // std::cout << "[APP] Lifecycle stop" << std::endl;
 }
 
 void TumClientApp::handleCrashOperation(LifecycleOperation *operation)
@@ -105,7 +105,7 @@ void TumClientApp::handleCrashOperation(LifecycleOperation *operation)
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 
-    std::cout << "[APP] Lifecycle crash" << std::endl;
+    // std::cout << "[APP] Lifecycle crash" << std::endl;
 }
 
 void TumClientApp::sendRequest()
@@ -127,14 +127,14 @@ void TumClientApp::sendRequest()
         getParentModule()->bubble(s.c_str());
     }
 
-    std::cout << "[APP] Send request" << std::endl;
+    // std::cout << "[APP] Send request" << std::endl;
 }
 
 void TumClientApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_PRECONNECT:
-            std::cout << "[APP] Pre-connect" << std::endl;
+            // std::cout << "[APP] Pre-connect" << std::endl;
 
             if (mobilityGate != nullptr)
                 sendDirect(new cMessage("START"), mobilityGate);
@@ -145,7 +145,7 @@ void TumClientApp::handleTimer(cMessage *msg)
 
 
         case MSGKIND_CONNECT:
-            std::cout << "[APP] Connect" << std::endl;
+            // std::cout << "[APP] Connect" << std::endl;
 
             if (hasGUI())
                 getParentModule()->getDisplayString().setTagArg("i2", 0, "status/green");
@@ -167,7 +167,7 @@ void TumClientApp::handleTimer(cMessage *msg)
             break;
 
         case MSGKIND_FINISHSESSION:
-            std::cout << "[APP] Finish Session" << std::endl;
+            // std::cout << "[APP] Finish Session" << std::endl;
 
             if (mobilityGate != nullptr)
                     sendDirect(new cMessage("END"), mobilityGate);
@@ -192,7 +192,7 @@ void TumClientApp::socketEstablished(TcpSocket *socket)
 {
     TcpAppBase::socketEstablished(socket);
 
-    std::cout << "[APP] Socket established" << endl;
+    // std::cout << "[APP] Socket established" << endl;
 
     // determine number of requests in this session
     numRequestsToSend = par("numRequestsPerSession");
@@ -253,7 +253,7 @@ void TumClientApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
 
-    std::cout << "[APP] Socket closed" << endl;
+    // std::cout << "[APP] Socket closed" << endl;
 
     if (hasGUI())
         getParentModule()->getDisplayString().setTagArg("i2", 0, "status/hourglass");

@@ -22,7 +22,7 @@ all: mobility_configs
 
 
 # ---------- COMPILING ----------
-.PHONY: libs simulations qt
+.PHONY: libs simulations gui
 ${INET}/src/libINET.so:
 	cd ${INET} && make
 
@@ -41,7 +41,7 @@ proj/tum: libs
 
 simulations: proj/simulations/Default proj/simulations/NonFrequentUpdates proj/simulations/Scalability
 
-qt: proj/tum mobility_configs
+gui: proj/tum mobility_configs
 	cd proj/simulations && ../tum -c Default ${OMNET_QT_FLAGS}
 
 proj/simulations/Default: proj/tum mobility_configs

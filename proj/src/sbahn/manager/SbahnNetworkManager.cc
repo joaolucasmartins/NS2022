@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "SbahnNetworkGenerator.h"
+#include "../manager/SbahnNetworkManager.h"
 
 #include <fstream>
 #include <sstream>
@@ -22,14 +22,14 @@
 
 #include <iostream>
 
-Define_Module(SbahnNetworkGenerator);
+Define_Module(SbahnNetworkManager);
 
-void SbahnNetworkGenerator::initialize()
+void SbahnNetworkManager::initialize()
 {
     parseFile(!par("disable") && hasGUI());
 }
 
-void SbahnNetworkGenerator::parseFile(bool addFigs) {
+void SbahnNetworkManager::parseFile(bool addFigs) {
     std::string filename = par("filename");
     std::ifstream in(filename, std::ios::in);
     if (in.fail())
@@ -89,7 +89,7 @@ void SbahnNetworkGenerator::parseFile(bool addFigs) {
 }
 
 
-void SbahnNetworkGenerator::addStop(int id, int degree, int lon, int lat, const std::string &name) {
+void SbahnNetworkManager::addStop(int id, int degree, int lon, int lat, const std::string &name) {
     cFigure::Point p((double) lon, (double) lat);
 
     auto *icon = new cIconFigure((std::to_string(id)+ "_icon").c_str());
@@ -110,7 +110,7 @@ void SbahnNetworkGenerator::addStop(int id, int degree, int lon, int lat, const 
     fGroup->addFigure(label);
 }
 
-void SbahnNetworkGenerator::addConnection(int a, int b, int routes) {
+void SbahnNetworkManager::addConnection(int a, int b, int routes) {
     auto sa = std::find(stations.begin(), stations.end(), Station(a));
     auto sb = std::find(stations.begin(), stations.end(), Station(b));
 
@@ -128,22 +128,19 @@ void SbahnNetworkGenerator::addConnection(int a, int b, int routes) {
 }
 
 
-inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(double minRadius, double maxRadius) {
+inet::Coord SbahnNetworkManager::getStationOutskirtsPos(double minRadius, double maxRadius) {
     Station target = getRandomStation();
     return getStationOutskirtsPos(&target, minRadius, maxRadius);
 }
 
-Station SbahnNetworkGenerator::getRandomStation() {
-    int idx = intuniform(0, stations.size());
-    std::cout << "idx: " << idx << std::endl;
+Station SbahnNetworkManager::getRandomStation() {
+    int idx = intuniform(0, stations.size() - 1);
     return stations.at(idx);
 }
 
-inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(const Station *target, double minRadius, double maxRadius) {
+inet::Coord SbahnNetworkManager::getStationOutskirtsPos(const Station *target, double minRadius, double maxRadius) {
     double radius = uniform(minRadius, maxRadius);
     double theta = uniform(0, M_2_PI);
-
-    std::cout << "r: " << radius << " t: " << theta << std::endl;
 
     double xPos = target->xPos + radius * std::cos(theta);
     double yPos = target->yPos + radius * std::sin(theta);
@@ -154,11 +151,37 @@ inet::Coord SbahnNetworkGenerator::getStationOutskirtsPos(const Station *target,
     yPos = yPos > 0 ? yPos : 0;
     yPos = yPos < maxY ? yPos : maxY;
 
-//    std::cout << "Center x: " << target->xPos << " y: " << target->yPos << "name: " << target->name << std::endl;
-//    std::cout << "Radius: " << radius << " " << " x: " << xPos << " y: " << yPos << std::endl << std::endl;
-
-    std::cout << target->name << " " << target->xPos << ":" << target->yPos << " -> " << xPos << ":" << yPos << std::endl;
-
     return inet::Coord(xPos, yPos, 0);
 }
+
+
+
+SbahnNetworkManager::TrainRep SbahnNetworkManager::getRandomActiveTrain() {
+    return activeTrains.at(intuniform(0, activeTrains.size() - 1));
+}
+
+void SbahnNetworkManager::registerTrainStart(cModule *train, simtime_t stopTime) {
+    activeTrains.emplace_back(stopTime, train);
+}
+
+void SbahnNetworkManager::registerTrainStop(cModule *train) {
+    auto lambda = [train](TrainRep i){ return i.train == train; };
+    activeTrains.erase(std::find_if(
+            activeTrains.begin(),
+            activeTrains.end(),
+            lambda
+    ));
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
