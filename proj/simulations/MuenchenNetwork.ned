@@ -92,7 +92,7 @@ network MuenchenNetwork
 
         client[nClients]: TumClient5G {
             parameters:
-                @display("is=s;i=misc/smartphone");
+                @display("i=misc/smartphone");
         }
 
 
