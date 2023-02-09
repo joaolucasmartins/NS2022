@@ -15,26 +15,48 @@
 
 #include "TrainBonnMotionMobility.h"
 
+#include "../../tumtrain/TumTrainApp.h"
+
 #include <iostream>
 
 Define_Module(TrainBonnMotionMobility);
 
-void TrainBonnMotionMobility::initialize(int stage) {
-    inet::LineSegmentsMobilityBase::initialize(stage);
+// COPY STUFF FROM BONN MOTION
 
-    EV_TRACE << "initializing TrainBonnMotionMobility stage " << stage << endl;
+TrainBonnMotionMobility::TrainBonnMotionMobility() :
+        startTimer(nullptr)
+{
+}
+
+TrainBonnMotionMobility::~TrainBonnMotionMobility()
+{
+    cancelAndDelete(startTimer);
+}
+
+void TrainBonnMotionMobility::initialize(int stage)
+{
+    BonnMotionMobility::initialize(stage);
+
     if (stage == inet::INITSTAGE_LOCAL) {
-        is3D = par("is3D");
-        int nodeId = getParentModule()->par("trainId");
-        std::cout << "Bonn nodeId: " << std::endl;
-        if (nodeId == -1)
-            nodeId = getContainingNode(this)->getIndex();
-        const char *fname = par("traceFile");
-        const inet::BonnMotionFile *bmFile = inet::BonnMotionFileCache::getInstance()->getFile(fname);
-        lines = bmFile->getLine(nodeId);
-        if (!lines)
-            throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
-        currentLine = 0;
-        computeMaxSpeed();
+        stationary = true;
+        startTimer = new cMessage("start");
+    } else if (stage == inet::INITSTAGE_LAST) {
+        TumTrainApp *app = static_cast<TumTrainApp*>(getParentModule()->getSubmodule("app", 0));
+        scheduleAt(app->par("startTime"), startTimer);
     }
 }
+
+void TrainBonnMotionMobility::handleSelfMessage(cMessage *message)
+{
+    if (!strcmp(message->getName(), "start")) {
+        stationary = false;
+    } else {
+        moveAndUpdate();
+        scheduleUpdate();
+    }
+}
+
+
+
+
+

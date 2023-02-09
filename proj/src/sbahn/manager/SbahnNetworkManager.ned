@@ -13,12 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package tum.tumserver;
+package tum.sbahn.manager;
 
-import inet.node.inet.StandardHost;
+//
+// TODO auto-generated module
+//
+simple SbahnNetworkManager
+{
+    parameters:
+        @display("i=block/wheelbarrow");
 
-module TumServer extends StandardHost {
-    submodules:
-        trainManager: TrainManager;
+        bool disable = default(false);
+        bool handoverLine = default(false);
+        string filename;
 }
-

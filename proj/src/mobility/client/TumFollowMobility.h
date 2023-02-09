@@ -13,31 +13,46 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __TUM_TRAINBONNMOTION_H_
-#define __TUM_TRAINBONNMOTION_H_
+#ifndef __TUM_TUMFOLLOWMOBILITY_H_
+#define __TUM_TUMFOLLOWMOBILITY_H_
 
 #include <omnetpp.h>
 
-#include <inet/mobility/single/BonnMotionMobility.h>
+#include "../../sbahn/manager/SbahnNetworkManager.h"
+#include <inet/mobility/base/MovingMobilityBase.h>
+#include <inet/mobility/base/MobilityBase.h>
 
 using namespace omnetpp;
 
 /**
  * TODO - Generated class
  */
-class TrainBonnMotionMobility : public inet::BonnMotionMobility
+class TumFollowMobility : public inet::MovingMobilityBase
 {
+    SbahnNetworkManager *sg;
+
+    const inet::Coord restCoords = inet::Coord(700, 300);
+
+    // state
+    MobilityBase *train;
+
   protected:
-    /** @brief The message used to restart mobility state changes. */
-    cMessage *startTimer;
+
+    /** @brief Initializes mobility model parameters. */
+    virtual void initialize(int stage) override;
+
+    /** @brief Initializes the position according to the mobility model. */
+    virtual void setInitialPosition() override;
+
+    virtual void initializePosition() override;
+
+    virtual void move() override;
+
+    virtual void handleMessage(omnetpp::cMessage *message) override;
 
   public:
-    TrainBonnMotionMobility();
-    ~TrainBonnMotionMobility();
+    TumFollowMobility();
 
-  protected:
-    virtual void initialize(int stage) override;
-    void handleSelfMessage(cMessage *message) override;
 };
 
 #endif

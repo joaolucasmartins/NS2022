@@ -133,7 +133,7 @@ def generatePlots(sca_df, vec_df, config_name):
         pass
 
     try:
-        mkdir(path.join("plots", configname))
+        mkdir(path.join("plots", config_name))
     except OSError as _:
         pass
     # Set filters
@@ -163,29 +163,29 @@ def generatePlots(sca_df, vec_df, config_name):
 
     linePlots = [
         (("appLayerOutputThroughput_fromClients", "Simulation Time (s)", "Client Application Layer Throughput"),
-            100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))][:1], "Bytes/s"),
+            100, vec_df[(appLayerThroughput(vec_df)) & (filterByClients(vec_df)) & (filterByOutgoingTraffic(vec_df))][:1], "Bytes/s", None),
         (("appLayerOutputThroughput_toServers", "Simulation Time (s)", "Server Application Layer Throughput"),
-            100, vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))], "Bytes/s"),
+            100, vec_df[(appLayerThroughput(vec_df)) & (filterByServer(vec_df)) & (filterByIncomingTraffic(vec_df))], "Bytes/s", None),
         (("linkLayerOutputThroughput_fromClients", "Simulation Time (s)", "Client Link Layer Throughput"),
-            0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))][:1], "Bytes/s"),
+            0, vec_df[(linkLayerThroughput(vec_df)) & (filterByClients(vec_df))][:1], "Bytes/s", None),
         (("linkLayerOutputThroughput_toServers", "Simulation Time (s)", "Server Link Layer Throughput"),
-            0, vec_df[(linkLayerThroughput(vec_df)) & (filterByServer(vec_df))], "Bytes/s"),
+            0, vec_df[(linkLayerThroughput(vec_df)) & (filterByServer(vec_df))], "Bytes/s", None),
         (("appLayerUtilization_toServers", "Simulation Time (s)", "Client-Server Channel Utilization"),
-            100, vec_df[(appLayerUtilization(vec_df)) & (filterByServer(vec_df))], "%"),
+            100, vec_df[(appLayerUtilization(vec_df)) & (filterByServer(vec_df))], "%", None),
         (("sentTrainUpdates_Server", "Simulation Time (s)", "Number of Sent Train Updates by Server"),
-            0, vec_df[serverSentTrainUpdates(vec_df)], ""),
+            0, vec_df[serverSentTrainUpdates(vec_df)], "", None),
         (("droppedTrainUpdates_Server", "Simulation Time (s)", "Number of Dropped Train Updates by Server"),
-            0, vec_df[serverDroppedTrainUpdates(vec_df)], ""),
+            0, vec_df[serverDroppedTrainUpdates(vec_df)], "", None),
         (("receivedTrainUpdates_Server", "Simulation Time (s)", "Number of Received Train Updates by Server"),
-            0, vec_df[serverReceivedTrainUpdates(vec_df)], ""),
-        (("trainDistance", "Simulation Time (s)", "Distance between train 0 and its tower"),
-            0, vec_df[distance(vec_df) & filterByTrains(vec_df)], "m"),
-        (("harqErrorRate", "Simulation Time (s)", "Harq error rate of train 0"),
-            0, vec_df[harqErrorRate(vec_df) & filterByTrains(vec_df)], ""),
-        (("rlcDelay", "Simulation Time (s)", "RLC delay of train 0"),
-            0, vec_df[rlcDelay(vec_df) & filterByTrains(vec_df)], "s"),
-        (("rlcPacketLoss", "Simulation Time (s)", "RLC Packet loss of train 0"),
-            0, vec_df[rlcPacketLoss(vec_df) & filterByTrains(vec_df)], "")
+            0, vec_df[serverReceivedTrainUpdates(vec_df)], "", None),
+        (("clientDistance", "Simulation Time (s)", "Distance between client and its tower"),
+            0, vec_df[distance(vec_df) & filterByClients(vec_df)], "m", ["Random Stationary", "Random Walking", "Following Train"]),
+        (("harqErrorRate", "Simulation Time (s)", "Harq error rate of client"),
+            0, vec_df[harqErrorRate(vec_df) & filterByClients(vec_df)], "", ["Random Stationary", "Random Walking", "Following Train"]),
+        (("rlcDelay", "Simulation Time (s)", "RLC delay of client 0"),
+            0, vec_df[rlcDelay(vec_df) & filterByClients(vec_df)], "s", ["Random Stationary", "Random Walking", "Following Train"]),
+        (("rlcPacketLoss", "Simulation Time (s)", "RLC Packet loss of client"),
+            0, vec_df[rlcPacketLoss(vec_df) & filterByTrains(vec_df)], "", ["Random Stationary", "Random Walking", "Following Train"])
     ]
 
     histPlots = [
@@ -194,14 +194,14 @@ def generatePlots(sca_df, vec_df, config_name):
         #("clientEndToEndDelay", sca_df[clientEndToEndDelay(sca_df)])
     ]
 
-    for text, NBins, data, unit in linePlots:
-        plotLine(text, NBins, data, unit, config_name)
+    for text, NBins, data, unit, legend in linePlots:
+        plotLine(text, NBins, data, unit, config_name, legend=legend)
 
     for text, data in histPlots:
         drawHist(text, data, config_name)
 
 
-def plotLine(text_info, N, data, unit, config_name, legend_from_modules=True, legend=None):
+def plotLine(text_info, N, data, unit, config_name, legend=None):
     from matplotlib.ticker import EngFormatter, PercentFormatter
 
     def binData(x, y, N):
@@ -238,7 +238,7 @@ def plotLine(text_info, N, data, unit, config_name, legend_from_modules=True, le
             ax.yaxis.set_major_formatter(formattery)
         sns.lineplot(x=n_x, y=n_y, ax=ax)
 
-    if (legend_from_modules):
+    if (legend == "Module"):
         legend = data[["module"]].to_numpy()
     if (legend is not None):
         ax.legend(labels=legend)
@@ -252,18 +252,19 @@ def plotLine(text_info, N, data, unit, config_name, legend_from_modules=True, le
 def drawHist(text_info, data, config_name):
     # Get merged data into np array
     values = np.concatenate(data.vecvalue.to_numpy())
+    values.sort()
+
+    q25, q75 = np.percentile(values, [25, 75])
+    bin_width = 2 * (q75 - q25) * len(values) ** (-1/3)
+    bins = round((values.max() - values.min()) / bin_width)
+
     if np.unique(values).size > 1:
         kde = True
     else:
         kde = False
 
     title, x_text, y_text = text_info
-    df = pd.DataFrame(values).melt(var_name='column', value_name='data')
-    sns.displot(data=df,
-        x="data",
-        col="column",
-        kde=kde
-    ).set(title=title, xlabel=x_text, ylabel=y_text)
+    sns.displot(values, bins=7)
 
     plt.savefig(path.join("plots", config_name, config_name + "_" + title),
         bbox_inches='tight', dpi=400)

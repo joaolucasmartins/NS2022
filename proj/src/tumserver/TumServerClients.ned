@@ -13,14 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package tum.sbahn.networkgenerator;
+package tum.tumserver;
 
-//
-// TODO auto-generated module
-//
-simple SbahnNetworkGenerator
-{
-    parameters:
-        bool disable;
-        string filename;
+import inet.node.inet.StandardHost;
+
+module TumServerClients extends StandardHost {
+
 }
+

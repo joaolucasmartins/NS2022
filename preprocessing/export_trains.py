@@ -118,8 +118,9 @@ for start_time, end_time, route, bonn in trains:
     f.write(f'*.train[{i}].app[0].startTime = {start_time}s\n')
     f.write(f'*.train[{i}].app[0].stopTime = {end_time}s\n')
 
-    bf.write(f'0 {INITIAL_X} {INITIAL_Y} ')
-    if bonn[-1][0] != 0:
+
+    if bonn[0][0] != 0:
+        bf.write(f'0 {INITIAL_X} {INITIAL_Y} ')
         bf.write(f'{bonn[0][0]} {INITIAL_X} {INITIAL_Y} ')
     for t, lat, lon in bonn:
         bf.write(f'{t} {lon:.0f} {lat:.0f} ')

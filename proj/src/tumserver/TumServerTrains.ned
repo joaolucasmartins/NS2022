@@ -13,31 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __TUM_SBAHNNETWORKGENERATOR_H_
-#define __TUM_SBAHNNETWORKGENERATOR_H_
+package tum.tumserver;
 
-#include <omnetpp.h>
+import inet.node.inet.StandardHost;
 
-#include <string>
-#include <map>
+module TumServerTrains extends StandardHost {
+    submodules:
+        trainManager: TrainManager;
+}
 
-using namespace omnetpp;
-
-/**
- * TODO - Generated class
- */
-class SbahnNetworkGenerator : public cSimpleModule
-{
-private:
-    std::map<int, double> stopsX;
-    std::map<int, double> stopsY;
-    cGroupFigure *fGroup;
-
-    void parseFile(bool addFigs);
-    void addStop(int id, int degree, int lat, int lon, const std::string &name);
-    void addConnection(int a, int b, int routes);
-  protected:
-    virtual void initialize() override;
-};
-
-#endif

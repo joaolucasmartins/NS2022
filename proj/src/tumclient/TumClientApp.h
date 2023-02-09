@@ -31,15 +31,18 @@ class TumClientApp : public TcpAppBase {
   protected:
     cMessage *timeoutMsg = nullptr;
     bool earlySend = false; // if true, don't wait with sendRequest() until established()
-    int numRequestsToSend = 0; // requests to send in this session
+    int numRequestsToSend = 0; // requests to send in this session (decreasing counter)
+    int sessionRequestsToSend = 0; // requests to send in this session (static total for each session)
     vector<int> tracksToRequest;
     simtime_t timestampReq;
 
-    simtime_t startTime;
-    simtime_t stopTime;
+    simtime_t startTime, stopTime;
+    simtime_t sessionThinkTime;
 
     cHistogram timeToResponseStats;
     cOutVector timeToResponseVec;
+
+    cGate *mobilityGate = nullptr;
 
     virtual void sendRequest();
     virtual void rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind);

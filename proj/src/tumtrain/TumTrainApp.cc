@@ -17,15 +17,18 @@
 
 #include "../common/TrainPacket.h"
 
-#include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/TagBase_m.h"
-#include "inet/common/TimeTag_m.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/FragmentationTag_m.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include <inet/applications/base/ApplicationPacket_m.h>
+#include <inet/common/ModuleAccess.h>
+#include <inet/common/TagBase_m.h>
+#include <inet/common/TimeTag_m.h>
+#include <inet/common/lifecycle/ModuleOperations.h>
+#include <inet/common/packet/Packet.h>
+#include <inet/networklayer/common/FragmentationTag_m.h>
+#include <inet/networklayer/common/L3AddressResolver.h>
+#include <inet/transportlayer/contract/udp/UdpControlInfo_m.h>
+
+#include "../sbahn/manager/SbahnNetworkManager.h"
+
 
 Define_Module(TumTrainApp);
 
@@ -58,6 +61,7 @@ void TumTrainApp::initialize(int stage)
         stopTime = par("stopTime");
         packetName = par("packetName");
         dontFragment = par("dontFragment");
+
         if (stopTime >= CLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new ClockEvent("sendTimer");
@@ -169,6 +173,11 @@ void TumTrainApp::processStart()
             scheduleClockEventAt(stopTime, selfMsg);
         }
     }
+
+    // Notify SbahnNetworkManager if possible
+    SbahnNetworkManager *sg = static_cast<SbahnNetworkManager*>(findModuleByPath("sbahnNetworkGenerator"));
+    if (sg != nullptr)
+        sg->registerTrainStart(getParentModule(), stopTime.asSimTime());
 }
 
 void TumTrainApp::processSend()
@@ -188,6 +197,11 @@ void TumTrainApp::processSend()
 void TumTrainApp::processStop()
 {
     socket.close();
+
+    // Notify SbahnNetworkManager if possible
+    SbahnNetworkManager *sg = static_cast<SbahnNetworkManager*>(findModuleByPath("sbahnNetworkGenerator"));
+    if (sg != nullptr)
+        sg->registerTrainStop(getParentModule());
 }
 
 void TumTrainApp::handleMessageWhenUp(cMessage *msg)
